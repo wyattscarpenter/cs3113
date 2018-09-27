@@ -2,7 +2,7 @@
 all: project
 
 clean:
-	rm project? project?.o
+	rm -f project? project?.o
 
 project: project?.c
 	gcc project?.c -Wall -o $(shell basename project?.c .c)

@@ -106,7 +106,7 @@ int main (int argc, char ** argv)
 	}
 
 	if(chk("help")){
-	  system("cat README.txt");
+	  system("cat /projects/1/README.txt");
 	  continue;
 	}
 
