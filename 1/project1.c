@@ -65,6 +65,7 @@ int main (int argc, char ** argv)
       // last entry will be NULL 
  
       if (args[0]) {                     // if there's anything there
+	//use this macro to avoid redundant typing:
 #define chk(str) !strcmp(args[0],str)
 	// check for internal/external command
 
