@@ -14,13 +14,9 @@
    if the first token is a recognized internal command, then that
    command is executed. otherwise the line is passed to the system
    shell.
-    
-   internal commands:
-    
-   wipe - clears the screen
-        
-   esc - exits from the program
-      
+   
+   see https://oudalab.github.io/cs3113fa18/projects/project1.html
+   for list of commands and specification.
 */
  
 #include <string.h>

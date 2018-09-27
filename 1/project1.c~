@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
@@ -114,11 +115,11 @@ int main (int argc, char ** argv)
 
 	if(chk("chdir")){
 	  if(args[1]){
+	    chdir(args[1]);
 	    char * cmd = malloc(strlen("PWD=") + strlen(args[1]) + 1);
 	    strcpy(cmd,"PWD=");
 	    strcat(cmd,args[1]);
 	    putenv(cmd); //this string is part of the env now, don't modify.
-	    chdir(strlen(args[1])
 	  } else {
 	    system("pwd");
 	  }

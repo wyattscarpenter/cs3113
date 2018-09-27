@@ -11,6 +11,7 @@ To solve this programming problem, I essentially modified strtokeg.c to cover th
 
 To Run
 Run the executable by itself to run in interactive mode. Pass a batchfile into stdin or as an argument to run the commands in the batchfile.
+See https://oudalab.github.io/cs3113fa18/projects/project1.html for list of commands and specification.
 
 Bugs and Assumptions
 This project contains no bugs to the best of my knowledge at this time. However, it does contain these assumptions:
