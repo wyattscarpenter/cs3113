@@ -110,6 +110,23 @@ int main (int argc, char ** argv)
 	  continue;
 	}
 
+	//the real meat of the assignment here (the libc calls):
+	if(chk("mimic")){
+	  //TODO
+	  continue;
+	}
+
+	if(chk("erase")){
+	  //TODO
+	  continue;
+	}
+
+	if(chk("morph")){
+	  //TODO
+	  continue;
+	}
+
+	//back to the non-meat:
 	if(chk("chdir")){
 	  if(args[1]){
 	    chdir(args[1]);
