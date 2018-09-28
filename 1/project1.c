@@ -37,9 +37,7 @@ int error(char * msg){
 }
 
 int erase(char * target){
-  //unlink only erases files, rmdir only (empty) directories
-  //it is easiest just to try both, rather than figure out which type the target is.
-  if(unlink(target) && rmdir(target)){
+  if(remove(target)){
     fprintf(stderr, "Couldn't erase %s\n", target);
     return -1;
   }else{
