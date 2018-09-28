@@ -30,6 +30,23 @@
    
 extern char **environ;                   // environment array
 
+//some helper function to write files:
+
+int error(char * msg){
+  return fprintf(stderr, "%s", msg);
+}
+
+int erase(char * target){
+  //unlink only erases files, rmdir only (empty) directories
+  //it is easiest just to try both, rather than figure out which type the target is.
+  if(unlink(target) && rmdir(target)){
+    fprintf(stderr, "Couldn't erase %s\n", target);
+    return -1;
+  }else{
+    return 0;
+  }
+}
+
 int main (int argc, char ** argv)
 {
   char isbatch = 0; //flag that indicates  if we are in a batch script
@@ -65,7 +82,7 @@ int main (int argc, char ** argv)
       // last entry will be NULL 
  
       if (args[0]) {                     // if there's anything there
-	//use this macro to avoid redundant typing:
+	//use this macro to avoid some redundant typing:
 #define chk(str) !strcmp(args[0],str)
 	// check for internal/external command
 
@@ -117,7 +134,11 @@ int main (int argc, char ** argv)
 	}
 
 	if(chk("erase")){
-	  //TODO
+	  if(args[1]){
+	    erase(args[1]);
+	  } else {
+	    error("No argument.");
+	  } 
 	  continue;
 	}
 
@@ -129,11 +150,14 @@ int main (int argc, char ** argv)
 	//back to the non-meat:
 	if(chk("chdir")){
 	  if(args[1]){
-	    chdir(args[1]);
-	    char * cmd = malloc(strlen("PWD=") + strlen(args[1]) + 1);
-	    strcpy(cmd,"PWD=");
-	    strcat(cmd,args[1]);
-	    putenv(cmd); //this string is part of the env now, don't modify.
+	    if(chdir(args[1])){
+	      fprintf(stderr, "Couldn't chdir to %s\n", args[1]);
+	    } else {
+	      char * cmd = malloc(strlen("PWD=") + strlen(args[1]) + 1);
+	      strcpy(cmd,"PWD=");
+	      strcat(cmd,args[1]);
+	      putenv(cmd); //this string is part of the env now, don't modify.
+	    }
 	  } else {
 	    system("pwd");
 	  }
