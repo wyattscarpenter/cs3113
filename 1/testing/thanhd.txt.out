@@ -1,0 +1,50 @@
+==>touch a
+==>touch b
+==>touch c
+==>filez
+a
+b
+c
+==>filez a b
+a
+b
+==>rm a
+==>filez a
+==>ls a
+==>mkdir abc
+==>cd abc
+==>chdir
+/root
+==>filez
+abc
+b
+c
+==>erase b
+==>filez b
+==>ls b
+==>rm c
+==>erase c
+==>touch a
+==>touch a
+==>touch b
+==>mimic a d
+==>mimic e a
+==>mimic t b
+==>filez
+a
+abc
+b
+d
+==>touch p
+==>morph p l
+==>morph k o
+==>morph u .
+==>morph q
+==>chdir abc
+==>chdir
+/root/abc
+==>chdir ..
+==>chdir /
+==>chdir
+/
+==>esc

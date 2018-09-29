@@ -1,0 +1,51 @@
+touch test.txt
+
+touch /projects/test2.txt
+
+morph /projects/test2.txt 
+
+filez
+
+morph test.txt newfile.txt 
+
+filez
+
+morph test.txt random/
+
+filez
+
+morph test.txt /dne
+
+morph test.txt /projects/1/dne
+
+filez
+
+morph test.txt .projects/1/dne/
+
+filez 
+
+touch /projects/1/test3.txt
+
+touch /projects/1/test4.txt
+
+filez
+
+morph /projects/1/test3.txt projects/1/test4.txt
+
+filez
+
+morph ../dne test1.txt
+
+morph test.txt /dne/dne
+
+morph test.txt /dne
+
+filez 
+
+morph test.txt ../newfile2.txt
+
+chdir .. 
+
+chdir 
+
+filez

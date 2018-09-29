@@ -1,0 +1,14 @@
+help
+clear
+mkdir foo
+chdir foo
+echo "this be a test matey" > text.txt
+filez
+ditto that should say text.txt
+mimic text.txt a
+mkdir tmp
+mimic a tmp/a
+mimic a tmp/../tmp/../fuck
+morph a b
+erase
+esc

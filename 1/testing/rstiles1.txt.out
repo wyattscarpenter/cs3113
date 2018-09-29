@@ -1,0 +1,31 @@
+==>touch f1.txt f2.txt
+==>mkdir d1 d2
+==>mkdir d2/d3
+==>filez
+d1
+d2
+f1.txt
+f2.txt
+==>mimic f1.txt f1new.txt
+==>filez
+d1
+d2
+f1.txt
+f1new.txt
+f2.txt
+==>mimic d1 d1new
+==>filez
+d1
+d2
+f1.txt
+f1new.txt
+f2.txt
+==>mimic f2.txt d2/d3/f2new.txt
+==>filez d2/d3
+f2new.txt
+==>mimic f1.txt d1
+==>filez d1
+f1.txt
+==>mkdir d4 d5
+==>mimic d4 d5
+==>

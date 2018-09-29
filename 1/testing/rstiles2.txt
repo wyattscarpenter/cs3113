@@ -1,0 +1,41 @@
+touch f.txt f2.txt
+filez
+morph f.txt morphSuccess.txt
+filez
+mkdir d1
+morph f2.txt d1/morphSuccess2.txt
+filez
+filez d1
+mkdir d2
+touch f3.txt
+morph f3.txt d2
+filez
+filez d2
+touch f4.txt
+mkdir d3
+morph f4.txt d3/f4to5.txt
+mkdir d4
+mkdir d4/d5
+touch f6.txt
+morph f6.txt d4/d5
+filez
+filez d4/d5
+touch f7.txt
+mkdir d6
+morph f7.txt d6/n7/n8
+morph f7.txt d6
+mkdir d7
+morph d7 d7to8
+mkdir d9 d10
+morph d9 d10
+filez
+filez d10
+mkdir d11
+mkdir d11/d12 d13
+morph d11 d13
+filez
+filez d13
+mkdir d14
+touch d14/f8.txt
+mkdir d15
+morph d14 d15

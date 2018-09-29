@@ -1,0 +1,43 @@
+==>touch test.txt
+==>touch /projects/test2.txt
+==>morph /projects/test2.txt 
+==>filez
+test.txt
+==>morph test.txt newfile.txt 
+==>filez
+newfile.txt
+==>morph test.txt random/
+==>filez
+newfile.txt
+==>morph test.txt /dne
+==>morph test.txt /projects/1/dne
+==>filez
+newfile.txt
+==>morph test.txt .projects/1/dne/
+==>filez 
+newfile.txt
+==>touch /projects/1/test3.txt
+==>touch /projects/1/test4.txt
+==>filez
+newfile.txt
+==>morph /projects/1/test3.txt projects/1/test4.txt
+==>filez
+newfile.txt
+==>morph ../dne test1.txt
+==>morph test.txt /dne/dne
+==>morph test.txt /dne
+==>filez 
+newfile.txt
+==>morph test.txt ../newfile2.txt
+==>chdir .. 
+==>chdir 
+/projects/1
+==>filez 
+README
+makefile
+project1
+project1.c
+special.txt
+test3.txt
+test4.txt
+==>
