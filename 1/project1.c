@@ -153,7 +153,7 @@ int main (int argc, char ** argv)
 
       originalstr = malloc(strlen(buf)+1); // allocate mem
       strcpy(originalstr, buf);
-      if(isbatch){puts(originalstr);} //print input if in batchfile, per spec
+      if(isbatch){printf(originalstr);} //print input if in batchfile, per spec
       // tokenize the input into args array
 
       arg = args;
@@ -203,7 +203,7 @@ int main (int argc, char ** argv)
 
 	if(chk("ditto")){ //"ditto" command
 	  //print comment line sans first 6 chars ("ditto ")
-	  puts(originalstr+6);
+	  printf(originalstr+6);
 	  continue;
 	}
 
@@ -262,7 +262,7 @@ int main (int argc, char ** argv)
 	// else pass command onto OS
 	arg = args;
 	system(originalstr);
-	fputs ("\n", stdout);
+	//fputs ("\n", stdout); //this line was unnecessary? and messed up bit-exact output?
       }
     }
   }
