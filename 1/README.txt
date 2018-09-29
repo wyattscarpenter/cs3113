@@ -20,4 +20,4 @@ Files will not contain spaces and words in comments will not be separated by mor
 POSIX-compatible operating system.
 
 References
-For this project, I used no references beyond the man pages and the information and materials presented as part of the class. My program is decended from strtokeg.c, as provided in the project 1 specification, and uses code from environ.c (also in the spec) and copy.c (provided as part of tlpi example code).
+For this project, I used no references beyond the man pages and the information and materials presented as part of the class. My program is decended from strtokeg.c, as provided in the project 1 specification, and uses code from environ.c (also in the spec). copy.c (provided as part of tlpi example code) was also consulted.
