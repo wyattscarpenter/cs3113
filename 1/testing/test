@@ -1,5 +1,6 @@
 #!/bin/bash
 mkdir cleandir
 (cd cleandir; ../../project1 ../"$1") > "$1".my
-diff -b -B "$1".out "$1".my
 rm -r cleandir
+sdiff -b -B "$1".out "$1".my
+
