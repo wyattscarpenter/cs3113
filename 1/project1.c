@@ -129,6 +129,7 @@ int mimicdf(char * src, char * dst){
 
 int main (int argc, char ** argv)
 {
+  setbuf(stdout, NULL);
   char isbatch = 0; //flag that indicates  if we are in a batch script
   //would be a bool that's not truly C style
   //if argument provided, read from it as a batchfile:
