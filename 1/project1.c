@@ -31,11 +31,11 @@
    
 extern char **environ;                   // environment array
 
-//some helper function to write files:
+//some helper functions:
 void * tmptr; //"temporary pointer" pronounced "tempter" like the devil.
 char * cat(char * l, char * r){
   //concatenates two strings and returns them
-  //(I got tired of writing this operation eventually)
+  //(I eventually got tired of writing this code every time)
   //YOU MUST FREE THIS STRING ONCE YOU ARE DONE WITH IT
   //(perhaps by calling free() on tmptr)
   tmptr = malloc(strlen(l) + strlen(r) + 1);
@@ -48,7 +48,7 @@ int error(char * msg){
   return fprintf(stderr, "%s\n", msg);
 }
 
-//some functions to manipulate files
+//some functions to manipulate files:
 
 int erase(char * target){
   if(remove(target)){
@@ -164,7 +164,9 @@ int main (int argc, char ** argv)
       if (args[0]) {                     // if there's anything there
 	//use this macro to avoid some redundant typing:
 #define chk(str) !strcmp(args[0],str)
+	
 	// check for internal/external command
+	// commands are listed/checked here in the order the spec specs them
 
 	if (!strcmp(args[0],"wipe")) { // "clear" command
 	  system("clear");
@@ -175,40 +177,44 @@ int main (int argc, char ** argv)
 	  break;                     // break out of 'while' loop
 	}
 	
-	if (chk("filez")){
+	if (chk("filez")){ //"filez" command
+	  //do the filez command via a call to the system's ls -1 cmd
 	  const char * ls1 = "ls -1 ";
 	  char * cmd;
-	  if(args[1]){
+	  if(args[1]){ //argument provided
+	    //make a string with appropriate cmd and pass to system
 	    cmd = malloc(strlen(ls1) + strlen(args[1]) + 1);
 	    strcpy(cmd, ls1);
 	    strcat(cmd,args[1]);
 	    system(cmd);
 	    free(cmd);
-	  }else{
+	  }else{ //no argument provided
 	    system(ls1);
 	  }
 	  continue;
 	}
 
-	if(chk("environ")){
+	if(chk("environ")){ //"environ" command
 	  //code from environ.c
 	  char ** env = environ;
 	  while (*env) printf("%s\n",*env++);  // step through environment
 	  continue;
 	}
 
-	if(chk("ditto")){
-	  puts(originalstr+6); //print comment line sans first 6 chars ("ditto ")
+	if(chk("ditto")){ //"ditto" command
+	  //print comment line sans first 6 chars ("ditto ")
+	  puts(originalstr+6);
 	  continue;
 	}
 
-	if(chk("help")){
+	if(chk("help")){ //"help" command
+	  //just cat the help file
 	  system("cat /projects/1/README.txt");
 	  continue;
 	}
 
 	//the real meat of the assignment here (the libc calls):
-	if(chk("mimic")){
+	if(chk("mimic")){ //"mimic" command
 	  if(args[1]&& args[2]){
 	    mimic(args[1],args[2]);
 	  } else {
@@ -217,7 +223,7 @@ int main (int argc, char ** argv)
 	  continue;
 	}
 
-	if(chk("erase")){
+	if(chk("erase")){ //"erase" command
 	  if(args[1]){
 	    erase(args[1]);
 	  } else {
@@ -226,25 +232,28 @@ int main (int argc, char ** argv)
 	  continue;
 	}
 
-	if(chk("morph")){
+	if(chk("morph")){ //"morph" command
 	  if (!mimicdf(args[1],args[2])){
+	    //only erase if the copy worked
 	    erase(args[1]);
 	  }
 	  continue;
 	}
 
 	//back to the non-meat:
-	if(chk("chdir")){
+	if(chk("chdir")){ //"chdir" command
 	  if(args[1]){
 	    if(chdir(args[1])){
 	      fprintf(stderr, "Couldn't chdir to %s\n", args[1]);
 	    } else {
+	      //chdir worked, now set the pwd using str manipulation
 	      char * cmd = malloc(strlen("PWD=") + strlen(args[1]) + 1);
 	      strcpy(cmd,"PWD=");
 	      strcat(cmd,args[1]);
 	      putenv(cmd); //this string is part of the env now, don't modify.
 	    }
 	  } else {
+	    //use system command to print working directory
 	    system("pwd");
 	  }
 	  continue;
