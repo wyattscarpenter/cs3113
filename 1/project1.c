@@ -33,7 +33,7 @@ extern char **environ;                   // environment array
 
 //some helper functions:
 void * tmptr; //"temporary pointer" pronounced "tempter" like the devil.
-char * cat(char * l, char * r){
+char * cat(const char * l, const char * r){
   //concatenates two strings and returns them
   //(I eventually got tired of writing this code every time)
   //YOU MUST FREE THIS STRING ONCE YOU ARE DONE WITH IT
@@ -162,7 +162,7 @@ int main (int argc, char ** argv)
  
       if (args[0]) {                     // if there's anything there
 	fputs(prompt, stdout);                // write prompt
-	if(isbatch){printf(originalstr);} //print input if in batchfile, per spec
+	if(isbatch){printf("%s",originalstr);} //print input if in batchfile, per spec
 
 	//use this macro to avoid some redundant typing:
 #define chk(str) !strcmp(args[0],str)
@@ -181,18 +181,13 @@ int main (int argc, char ** argv)
 	
 	if (chk("filez")){ //"filez" command
 	  //do the filez command via a call to the system's ls -1 cmd
-	  const char * ls1 = "ls -1 ";
-	  char * cmd;
-	  if(args[1]){ //argument provided
-	    //make a string with appropriate cmd and pass to system
-	    cmd = malloc(strlen(ls1) + strlen(args[1]) + 1);
-	    strcpy(cmd, ls1);
-	    strcat(cmd,args[1]);
-	    system(cmd);
-	    free(cmd);
-	  }else{ //no argument provided
-	    system(ls1);
+	  const char * ls1 = "ls -1";
+	  char * argstr;
+	  if (! (argstr = strchr(originalstr, ' '))){ //assign argstr to 1st space in original str
+	    argstr = ""; // or an empty string if that failed
 	  }
+	  system(cat(ls1,argstr));
+	  free(tmptr);
 	  continue;
 	}
 
@@ -204,8 +199,10 @@ int main (int argc, char ** argv)
 	}
 
 	if(chk("ditto")){ //"ditto" command
-	  //print comment line sans first 6 chars ("ditto ")
-	  printf(originalstr+6);
+	  if(strlen(originalstr)>6){ //check to see if there's anything after "ditto "
+	    //print comment line sans first 6 chars ("ditto ")
+	    printf("%s",originalstr+6);
+	  }
 	  continue;
 	}
 

@@ -20,8 +20,9 @@ The project contains these assumptions:
 Morph and mimic are undefined if [src] is a destination.
 Mimic is undefined unless both [src] and [dst] are files.
 Files will not contain spaces and words in comments will not be separated by more than one space.
-The README.txt is in its original location, and 
+The README.txt is in its original location.
 Error messages are not particularly important.
+If you want to exactly match the reference implimentation, various Ubuntu assumptions must be true, such as ls sort order (ls sort order was different on the Debian machine I developed on, and frightened me for a while).
 POSIX-compatible operating system.
 Computer has at least a nickel's worth of memory.
 

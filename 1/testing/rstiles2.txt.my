@@ -1,7 +1,7 @@
 ==>touch f.txt f2.txt
 ==>filez
-f2.txt
 f.txt
+f2.txt
 ==>morph f.txt morphSuccess.txt
 ==>filez
 f2.txt
@@ -76,4 +76,3 @@ d11
 ==>touch d14/f8.txt
 ==>mkdir d15
 ==>morph d14 d15
-==>
