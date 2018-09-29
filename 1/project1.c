@@ -130,7 +130,7 @@ int mimicdf(char * src, char * dst){
 int main (int argc, char ** argv)
 {
   setbuf(stdout, NULL);
-  char isbatch = 0; //flag that indicates  if we are in a batch script
+  int isbatch = 0; //flag that indicates  if we are in a batch script
   //would be a bool that's not truly C style
   //if argument provided, read from it as a batchfile:
   if(argc>1){ //executable is of course the 1st arg
@@ -142,13 +142,17 @@ int main (int argc, char ** argv)
   char ** arg;                               // working pointer thru args
   char * prompt = "==>" ;                    // shell prompt
   char * originalstr;                        // copy of original str to print/pass to system
-    
-  // keep reading input until "quit" command or eof of redirected input
-     
-  while (!feof(stdin)) { 
-    
+  int prevlineempty=0; //bool we use to keep from double-printing prompts like an idiot
+
+  // keep reading input until "esc" command or eof of redirected input
+
+  while (!feof(stdin)) {
     // get command line from input
-  
+    if(!prevlineempty || !isbatch){
+      fputs(prompt, stdout);                // write prompt
+    }
+    prevlineempty=1;
+
     if (fgets(buf, MAX_BUFFER, stdin) ) { // read a line
 
       originalstr = malloc(strlen(buf)+1); // allocate mem
@@ -161,8 +165,10 @@ int main (int argc, char ** argv)
       // last entry will be NULL 
  
       if (args[0]) {                     // if there's anything there
-	fputs(prompt, stdout);                // write prompt
-	if(isbatch){printf("%s",originalstr);} //print input if in batchfile, per spec
+	prevlineempty=0;
+	if(isbatch){ //print input if in batchfile, per spec
+	  printf("%s",originalstr); //write command
+	} 
 
 	//use this macro to avoid some redundant typing:
 #define chk(str) !strcmp(args[0],str)
@@ -266,7 +272,6 @@ int main (int argc, char ** argv)
 	// else pass command onto OS
 	arg = args;
 	system(originalstr);
-	//fputs ("\n", stdout); //this line was unnecessary? and messed up bit-exact output?
       }
     }
   }
