@@ -149,12 +149,10 @@ int main (int argc, char ** argv)
     
     // get command line from input
   
-    fputs(prompt, stdout);                // write prompt
     if (fgets(buf, MAX_BUFFER, stdin) ) { // read a line
 
       originalstr = malloc(strlen(buf)+1); // allocate mem
       strcpy(originalstr, buf);
-      if(isbatch){printf(originalstr);} //print input if in batchfile, per spec
       // tokenize the input into args array
 
       arg = args;
@@ -163,6 +161,9 @@ int main (int argc, char ** argv)
       // last entry will be NULL 
  
       if (args[0]) {                     // if there's anything there
+	fputs(prompt, stdout);                // write prompt
+	if(isbatch){printf(originalstr);} //print input if in batchfile, per spec
+
 	//use this macro to avoid some redundant typing:
 #define chk(str) !strcmp(args[0],str)
 	
@@ -234,10 +235,15 @@ int main (int argc, char ** argv)
 	}
 
 	if(chk("morph")){ //"morph" command
-	  if (!mimicdf(args[1],args[2])){
+	  if(args[1]&& args[2]){
+	    if (!mimicdf(args[1],args[2])){
 	    //only erase if the copy worked
 	    erase(args[1]);
+	    }
+	  } else {
+	    error("morph requires two arguments: source and destination.");
 	  }
+	  
 	  continue;
 	}
 
