@@ -75,7 +75,8 @@ int mimic(char * src, char * dst){
     error("couldn't open source file");
     ret |= 1;
   } else {
-    d = open(dst, O_CREAT | O_WRONLY | O_TRUNC);
+    d = open(dst, O_CREAT | O_WRONLY | O_TRUNC, 00666);
+    // octal 666 means everyone has rw priveleges
     if(d==-1){
       error("couldn't open destination file");
       ret |= 2;
