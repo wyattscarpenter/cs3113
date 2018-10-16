@@ -1,5 +1,5 @@
 /* 
-   project2  - a shell
+   project2  - CS3113 shell
   
    usage:
 
@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
@@ -130,6 +131,24 @@ int mimicdf(char * src, char * dst){
   return ret;
 }
 
+//replacement fn for system
+//forks and execs
+//function adapted from example code in
+//https://oudalab.github.io/cs3113fa18/projects/project2.html#your-todos
+int fe(const char * command, char ** args){
+  //args should almost always be called with the value args[1] in the code below
+  int pid;
+  switch(pid = fork()) { 
+  case -1:
+    error("couldn't fork"); 
+  case 0:                 // child 
+    execvp(args[0], args); 
+    error("exec came back?!");
+  default:                // parent
+    return waitpid(pid, NULL, WUNTRACED); //here we pass in NULL instead of the address of an int because this is the correct way to indicate we don't  need the int.
+  }  
+}
+
 int main (int argc, char ** argv)
 {
   setbuf(stdout, NULL);
@@ -144,7 +163,7 @@ int main (int argc, char ** argv)
   char * args[MAX_ARGS];                     // pointers to arg strings
   char ** arg;                               // working pointer thru args
   char * prompt = "==>" ;                    // shell prompt
-  char * originalstr;                        // copy of original str to print/pass to system
+  char * originalstr;                    // copy of original str to print in ditto
   int prevlineempty=0; //bool we use to keep from double-printing prompts like an idiot
 
   // keep reading input until "esc" command or eof of redirected input
@@ -157,11 +176,9 @@ int main (int argc, char ** argv)
     prevlineempty=1;
 
     if (fgets(buf, MAX_BUFFER, stdin) ) { // read a line
-
       originalstr = malloc(strlen(buf)+1); // allocate mem
       strcpy(originalstr, buf);
       // tokenize the input into args array
-
       arg = args;
       *arg++ = strtok(buf,SEPARATORS);   // tokenize input
       while ((*arg++ = strtok(NULL,SEPARATORS)));
@@ -180,7 +197,7 @@ int main (int argc, char ** argv)
 	// commands are listed/checked here in the order the spec specs them
 
 	if (!strcmp(args[0],"wipe")) { // "clear" command
-	  system("clear");
+	  fe("clear", NULL);
 	  continue;
 	}
             
@@ -190,13 +207,8 @@ int main (int argc, char ** argv)
 	
 	if (chk("filez")){ //"filez" command
 	  //do the filez command via a call to the system's ls -1 cmd
-	  const char * ls1 = "ls -1";
-	  char * argstr;
-	  if (! (argstr = strchr(originalstr, ' '))){ //assign argstr to 1st space in original str
-	    argstr = ""; // or an empty string if that failed
-	  }
-	  system(cat(ls1,argstr));
-	  free(tmptr);
+	  args[0]="-l";
+	  fe("ls",args);
 	  continue;
 	}
 
@@ -217,7 +229,9 @@ int main (int argc, char ** argv)
 
 	if(chk("help")){ //"help" command
 	  //just cat the help file
-	  system("cat /projects/1/README.txt");
+	  char * tmp_args[] = {"/projects/2/README.txt", ""}; //can't pass in an array literal (sans confusing magic), must use this tmp variable.
+	  //note also that I've written char * tmp_args[] instead of char ** tmp_args ONLY BECAUSE gcc complained to me about the talmudic misimplications of the latter form.
+	  fe("cat", tmp_args);
 	  continue;
 	}
 
@@ -267,7 +281,7 @@ int main (int argc, char ** argv)
 	    }
 	  } else {
 	    //use system command to print working directory
-	    getenv("pwd");
+	    puts(getenv("PWD"));
 	  }
 	  continue;
 	}
@@ -298,7 +312,7 @@ int main (int argc, char ** argv)
 	
 	// else pass command onto OS
 	arg = args;
-	system(originalstr);
+	fe(args[0],&(args[1])); //run cmd with rest of args array
       }
     }
   }
