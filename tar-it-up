@@ -1,0 +1,2 @@
+#!/bin/bash
+tar -cvzf  "$(basename project?.c .c).tar.gz" project?.c project? Makefile README.txt
