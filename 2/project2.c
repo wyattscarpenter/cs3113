@@ -105,6 +105,7 @@ int mimic(char * src, char * dst){
 }
 
 int mimicdf(char * src, char * dst){
+  //TODO: use nftw for new functionality
   //try mimic as directory, then try mimic as file
   //easier than testing which one dst is beforehand, honestly
   //TODO: this function will cause mimic to print an error to stderr,
@@ -131,22 +132,30 @@ int mimicdf(char * src, char * dst){
   return ret;
 }
 
-//replacement fn for system
-//forks and execs
-//function adapted from example code in
-//https://oudalab.github.io/cs3113fa18/projects/project2.html#your-todos
+
 int fe(const char * command, char ** args){
-  //args should almost always be called with the value args[1] in the code below
+  //replacement fn for system
+  //forks and execs
+  //function adapted from example code in
+  //https://oudalab.github.io/cs3113fa18/projects/project2.html#your-todos
+  //args should almost always be called with the value args in the code below
+  //args[0] is the name of the program, as is convention. 
   int pid;
-  switch(pid = fork()) { 
+  switch( pid = fork() ){ 
   case -1:
     error("couldn't fork"); 
   case 0:                 // child 
-    execvp(args[0], args); 
+    execvp(command, args); 
     error("exec came back?!");
   default:                // parent
     return waitpid(pid, NULL, WUNTRACED); //here we pass in NULL instead of the address of an int because this is the correct way to indicate we don't  need the int.
-  }  
+  }
+}
+
+int fen(const char * command){
+  //call fe with no arguments
+  char * args[] = {command, NULL};
+  fe(command, args);
 }
 
 int main (int argc, char ** argv)
@@ -197,7 +206,7 @@ int main (int argc, char ** argv)
 	// commands are listed/checked here in the order the spec specs them
 
 	if (!strcmp(args[0],"wipe")) { // "clear" command
-	  fe("clear", NULL);
+	  fen("clear");
 	  continue;
 	}
             
@@ -207,7 +216,7 @@ int main (int argc, char ** argv)
 	
 	if (chk("filez")){ //"filez" command
 	  //do the filez command via a call to the system's ls -1 cmd
-	  args[0]="-l";
+	  args[0]="-1";
 	  fe("ls",args);
 	  continue;
 	}
@@ -312,7 +321,7 @@ int main (int argc, char ** argv)
 	
 	// else pass command onto OS
 	arg = args;
-	fe(args[0],&(args[1])); //run cmd with rest of args array
+	fe(args[0],args); //run cmd with rest of args array
       }
     }
   }
