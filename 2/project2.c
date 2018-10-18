@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <ftw.h>
+#include <libgen.h>
 
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
@@ -37,17 +38,6 @@
 extern char **environ;                   // environment array
 
 //some helper functions:
-char * parent(char * path){
-  //TODO: clean up this function. I just hacked it out to get it done.
-  if( !strcmp(path, "/") ){ //check for root dir
-    return "/";
-  } else {
-    int l = strlen(path);
-    while(path[--l]=='/'){path[l]='\0'}; //get rid of all terminating slashes
-    char * slashyboi = strrchar(path, '/'); //find index of last slash
-    return strncpy(path, slashyboi);
-};
-
 int error(char * msg){
   return fprintf(stderr, "%s\n", msg);
 }
@@ -143,20 +133,38 @@ int mimic(char ** args){
     return EXIT_FAILURE;
   }
   //TODO: use nftw for new functionality
-  //try mimic as directory, then try mimic as file
-  //easier than testing which one dst is beforehand, honestly
-  //TODO: this function will cause mimic to print an error to stderr,
-  // which is not desirable. However, it's not being graded, so this is acceptable.
-  struct stat srcstat;
-  int srcerr;
-  struct stat dststat;
-  int dsterr;
-  struct stat pdststat;
-  int pdsterr;
-  srcerr = stat(src, &srcstat);
-  dsterr = stat(dst, &dststat);
-  printf("%d %d", srcerr, dsterr);
-  return EXIT_FAILURE;
+  DIR * srcdir = opendir(src);
+  DIR * dstdir = opendir(dst);
+  DIR * pdstdir = opendir(dirname(dst));
+  int srcempty = readdir(srcdir) == 0; //empty or error, we assume empty
+  
+  char * srcindst = "";
+  strcat(srcindst,dst);
+  strcat(srcindst,"/");
+  strcat(srcindst,basename(src));
+  //if these are not dirs, the pointers will be null. Also if they don't exist.
+  if(srcdir && dstdir){
+    if(recursive){
+      //TODO: RECURSE
+    } else if (srcempty) {
+      return mkdir(srcindst, RW_ALL);
+    } else {
+      error("src folder non-empty and -r not supplied; nothing done.");
+      return EXIT_FAILURE;
+    }
+  } else if (dstdir){
+    return copy(src, srcindst);
+  } else if (srcdir && pdstdir){
+    if(recursive){
+      //TODO: RECURSE
+    } else if (srcempty) {
+      mkdir(dst, RW_ALL);
+    } else {
+      error("src folder non-empty and -r not supplied; nothing done.");
+    }
+  } else {
+    return copy(src, dst);
+  }
 }
 
 
