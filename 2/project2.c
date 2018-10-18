@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
@@ -62,7 +63,7 @@ int erase(char * target){
   }
 }
 
-int mimic(char * src, char * dst){
+int copy(char * src, char * dst){
   //copy src file to dst file
   int ret = 0; //error value to return 
   int s; //source file descriptor
@@ -92,11 +93,11 @@ int mimic(char * src, char * dst){
 	}
       }
       if (close(s)){
-	error("Couldn't close source file in mimic");
+	error("Couldn't close source file when copying");
 	ret |= 4;
       }
       if (close(d)){
-	error("Couldn't close destination file in mimic");
+	error("Couldn't close destination file when copying");
 	ret |= 8;
       }
     }
@@ -104,32 +105,58 @@ int mimic(char * src, char * dst){
   return ret;
 }
 
-int mimicdf(char * src, char * dst){
+int mimic(char ** args){
+  //args must be terminated by a null string
+  
+  //parse args
+  int recursive = 0;
+  char * src = NULL;
+  char * dst = NULL;
+  int i = 1; //args 0 is name of command (morph or mimic)
+  while (args[i]){
+    if(!strcmp("-r",args[i])){
+      if(recursive == 1){
+	error("recursive flag specified multiple times"); //supererogatory error checking
+	recursive = 2;
+      } else {
+	recursive = 1;
+      }
+    } else {
+      if(!src){
+	src = args[i];
+      } else if (!dst){
+	dst = args[i];
+      } else {
+	error("too many arguments!");
+	return EXIT_FAILURE;
+      }
+    }
+    i++;
+  }
+  if(!src || !dst){
+    fprintf(stderr, "Usage: %s [-r] src dst\n", args[0]);
+    return EXIT_FAILURE;
+  }
+  //check for one error, unnecessarily tbh
+  if(access(src,R_OK)){ //access returns 0 if OK, so the following happens if not OK 
+    error("can't read src");
+    return EXIT_FAILURE;
+  }
   //TODO: use nftw for new functionality
   //try mimic as directory, then try mimic as file
   //easier than testing which one dst is beforehand, honestly
   //TODO: this function will cause mimic to print an error to stderr,
   // which is not desirable. However, it's not being graded, so this is acceptable.
-  int ret = 0;
-
-  char * srcname = src; //will hold the part of src string after the last slash
-  char * slashyboi; //location of last slash
-  char * dstname; //will hold dst plus a slash
-  slashyboi = strrchr(src, '/');
-  if(slashyboi){
-    srcname = slashyboi+1;//if last character is slash, will be a pointer to a null byte.
-  }
-  dstname = cat(dst,"/"); //no need to free after cat because dstname will be freed when leaving scope.
-  ret = mimic(src, cat(dstname,srcname));
-  free(tmptr);
-  //after all that nonsense, I wonder if I should have just used stat()...
-  
-  if(ret==2){
-    //mimic into dir didn't work
-    ret = mimic(src, dst);
-    //errors are already printed in mimic() proper. 
-  }
-  return ret;
+  struct stat srcstat;
+  int srcerr;
+  struct stat dststat;
+  int dsterr;
+  struct stat pdststat;
+  int pdsterr;
+  srcerr = stat(src, &srcstat);
+  dsterr = stat(dst, &dststat);
+  printf("%d %d", srcerr, dsterr);
+  return EXIT_FAILURE;
 }
 
 
@@ -252,11 +279,7 @@ int main (int argc, char ** argv)
 
 	//the real meat of the assignment here (the libc calls):
 	if(chk("mimic")){ //"mimic" command
-	  if(args[1]&& args[2]){
-	    mimic(args[1],args[2]);
-	  } else {
-	    error("mimic requires two arguments: source and destination.");
-	  }
+	  mimic(args); //mimic checks for correct args
 	  continue;
 	}
 
@@ -269,16 +292,11 @@ int main (int argc, char ** argv)
 	  continue;
 	}
 
-	if(chk("morph")){ //"morph" command
-	  if(args[1]&& args[2]){
-	    if (!mimicdf(args[1],args[2])){
+	if(chk("morph")){ //"morph"
+	  if (!mimic(args)){ //mimic checks args
 	    //only erase if the copy worked
 	    erase(args[1]);
-	    }
-	  } else {
-	    error("morph requires two arguments: source and destination.");
 	  }
-	  
 	  continue;
 	}
 
@@ -331,5 +349,5 @@ int main (int argc, char ** argv)
       }
     }
   }
-  return 0; 
+  return EXIT_SUCCESS; 
 }
