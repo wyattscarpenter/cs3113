@@ -152,10 +152,10 @@ int fe(const char * command, char ** args){
   }
 }
 
-int fen(const char * command){
+int fen(char * command){
   //call fe with no arguments
   char * args[] = {command, NULL};
-  fe(command, args);
+  return fe(command, args);
 }
 
 int main (int argc, char ** argv)
@@ -216,8 +216,17 @@ int main (int argc, char ** argv)
 	
 	if (chk("filez")){ //"filez" command
 	  //do the filez command via a call to the system's ls -1 cmd
-	  args[0]="-1";
-	  fe("ls",args);
+	  //must prepare an array for fe()
+	  char * ls_arr[MAX_ARGS + 2];
+	  ls_arr[0] = "ls";
+	  ls_arr[1] = "-1";
+	  int i = 0;
+	  char * s;
+	  while( (s=args[i++]) ){
+	    ls_arr[i+1]=s;
+	  }
+	  ls_arr[i+1] = "";
+	  fe(ls_arr[0],ls_arr);
 	  continue;
 	}
 
@@ -238,7 +247,7 @@ int main (int argc, char ** argv)
 
 	if(chk("help")){ //"help" command
 	  //just cat the help file
-	  char * tmp_args[] = {"/projects/2/README.txt", ""}; //can't pass in an array literal (sans confusing magic), must use this tmp variable.
+	  char * tmp_args[] = {"cat", "/projects/2/README.txt", ""}; //can't pass in an array literal (sans confusing magic), must use this tmp variable.
 	  //note also that I've written char * tmp_args[] instead of char ** tmp_args ONLY BECAUSE gcc complained to me about the talmudic misimplications of the latter form.
 	  fe("cat", tmp_args);
 	  continue;
