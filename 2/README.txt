@@ -24,6 +24,7 @@ Files will not contain spaces and words in comments will not be separated by mor
 The README.txt is in its original location.
 filez and other internal commands will not be paired with redirects.
 The src location in morph and mimic may not be the current directory, parent directory, or a glob. In other terms, the following [src] locations are not acceptable: ., .., /, \*txt. If those such things are attempted, the program's behavior is undefined.
+Passing more than 60 targets to filez is undefined. In fact, passing more than one target to filez is undefined, but I'll let you do it up to 60.
 Error messages are not particularly important.
 If you want to exactly match the reference implimentation, various Ubuntu assumptions must be true, such as ls sort order (ls sort order was different on the Debian machine I developed on, and frightened me for a while).
 POSIX-compatible operating system.

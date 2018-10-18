@@ -146,7 +146,8 @@ int fe(const char * command, char ** args){
     error("couldn't fork"); 
   case 0:                 // child 
     execvp(command, args); 
-    error("exec came back?!");
+    error("couldn't exec");
+    exit(EXIT_FAILURE);
   default:                // parent
     return waitpid(pid, NULL, WUNTRACED); //here we pass in NULL instead of the address of an int because this is the correct way to indicate we don't  need the int.
   }
@@ -217,16 +218,12 @@ int main (int argc, char ** argv)
 	if (chk("filez")){ //"filez" command
 	  //do the filez command via a call to the system's ls -1 cmd
 	  //must prepare an array for fe()
-	  char * ls_arr[MAX_ARGS + 2];
-	  ls_arr[0] = "ls";
-	  ls_arr[1] = "-1";
-	  int i = 0;
-	  char * s;
-	  while( (s=args[i++]) ){
-	    ls_arr[i+1]=s;
-	  }
-	  ls_arr[i+1] = "";
-	  fe(ls_arr[0],ls_arr);
+	  //ends up being ls [targets] -1
+	  int i=0;
+	  while(args[++i]); //set i to first null cmd
+	  args[i] = "-1";
+	  args[0] = "ls";
+	  fe(args[0],args);
 	  continue;
 	}
 
