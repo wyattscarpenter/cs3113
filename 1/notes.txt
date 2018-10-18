@@ -1,0 +1,18 @@
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with C-x C-f and enter text in its buffer.
+
+IN OS: ASKED ABOUT
+
+PRINTING OUTPUT IF THE BATCHFILE IS PIPED IN (won't be piped in)
+(FRIENDLY TO NEWLINES)
+(24 hour extension)
+relative readme path?(no!)
+"Instance is reachable and code compiles with make and run" (ignore)
+
+glob etc? (ok)
+
+still don't know:
+what errors to cover?
+  obviously writing files etc
+  sh errors?
+  error handle batchfile as param not found?
