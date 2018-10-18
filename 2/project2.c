@@ -24,9 +24,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <dirent.h>
+#include <ftw.h>
 
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
@@ -36,17 +37,16 @@
 extern char **environ;                   // environment array
 
 //some helper functions:
-void * tmptr; //"temporary pointer" pronounced "tempter" like the devil.
-char * cat(const char * l, const char * r){
-  //concatenates two strings and returns them
-  //(I eventually got tired of writing this code every time)
-  //YOU MUST FREE THIS STRING ONCE YOU ARE DONE WITH IT
-  //(perhaps by calling free() on tmptr)
-  tmptr = malloc(strlen(l) + strlen(r) + 1);
-  strcpy(tmptr, l);
-  strcat(tmptr, r);
-  return tmptr;
-}
+char * parent(char * path){
+  //TODO: clean up this function. I just hacked it out to get it done.
+  if( !strcmp(path, "/") ){ //check for root dir
+    return "/";
+  } else {
+    int l = strlen(path);
+    while(path[--l]=='/'){path[l]='\0'}; //get rid of all terminating slashes
+    char * slashyboi = strrchar(path, '/'); //find index of last slash
+    return strncpy(path, slashyboi);
+};
 
 int error(char * msg){
   return fprintf(stderr, "%s\n", msg);
