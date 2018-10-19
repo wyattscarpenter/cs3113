@@ -15,7 +15,7 @@
    command is executed. otherwise the line is passed to the system
    shell.
    
-   see https://oudalab.github.io/cs3113fa18/projects/project1.html
+   see https://oudalab.github.io/cs3113fa18/projects/project2.html
    for list of commands and specification.
 */
  
@@ -40,6 +40,16 @@ extern char **environ;                   // environment array
 //some helper functions:
 int error(char * msg){
   return fprintf(stderr, "%s\n", msg);
+}
+
+void * tmptr; //you can clear this to avoid memory leaks sometimes.
+char * slash(char * l, char * r){
+  char * new = malloc(strlen(l)+strlen(r)+4); //4 seems like a good margin
+  strcat(new,l);
+  strcat(new,"/");
+  strcat(new,r);
+  tmptr = new;
+  return new;
 }
 
 //some functions to manipulate files:
@@ -97,7 +107,7 @@ int copy(char * src, char * dst){
 
 int mimic(char ** args){
   //args must be terminated by a null string
-  
+
   //parse args
   int recursive = 0;
   char * src = NULL;
@@ -132,39 +142,50 @@ int mimic(char ** args){
     error("can't read src");
     return EXIT_FAILURE;
   }
+
+  int ret = 0;  
   //TODO: use nftw for new functionality
   DIR * srcdir = opendir(src);
   DIR * dstdir = opendir(dst);
-  DIR * pdstdir = opendir(dirname(dst));
-  int srcempty = readdir(srcdir) == 0; //empty or error, we assume empty
   
-  char * srcindst = "";
-  strcat(srcindst,dst);
-  strcat(srcindst,"/");
-  strcat(srcindst,basename(src));
+  char * bsrc = malloc(strlen(src)+1);
+  basename(strcpy(bsrc,src));
+  char * ddst = malloc(strlen(dst)+1);
+  dirname(strcpy(ddst,dst));
+  char * srcindst = slash(dst,bsrc);
+
+  DIR * pdstdir = opendir(dirname(dst));
   //if these are not dirs, the pointers will be null. Also if they don't exist.
+  struct dirent * firstinsrc = NULL;
+  if(srcdir){
+    firstinsrc = readdir(srcdir); //null on empty dir or error, we assume empty
+  }
   if(srcdir && dstdir){
     if(recursive){
       //TODO: RECURSE
-    } else if (srcempty) {
-      return mkdir(srcindst, RW_ALL);
+    } else if (!firstinsrc) {
+      ret = mkdir(srcindst, RW_ALL);
     } else {
       error("src folder non-empty and -r not supplied; nothing done.");
-      return EXIT_FAILURE;
+      ret = EXIT_FAILURE;
     }
   } else if (dstdir){
-    return copy(src, srcindst);
+    ret = copy(src, srcindst);
   } else if (srcdir && pdstdir){
     if(recursive){
       //TODO: RECURSE
-    } else if (srcempty) {
-      mkdir(dst, RW_ALL);
+    } else if (!firstinsrc) {
+      ret = mkdir(dst, RW_ALL);
     } else {
       error("src folder non-empty and -r not supplied; nothing done.");
+      ret = EXIT_FAILURE;
     }
   } else {
-    return copy(src, dst);
+    ret = copy(src, dst);
   }
+  free(srcindst);
+  free(bsrc);
+  return ret;
 }
 
 
@@ -257,6 +278,7 @@ int main (int argc, char ** argv)
 	  int i=0;
 	  while(args[++i]); //set i to first null cmd
 	  args[i] = "-1";
+	  args[i+1] = NULL; //make sure there are no trailing arguments
 	  args[0] = "ls";
 	  fe(args[0],args);
 	  continue;
