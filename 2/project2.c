@@ -33,7 +33,7 @@
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
 #define SEPARATORS " \t\n"                     // token sparators
-#define RW_ALL 00666
+#define ALL_PERM 00777
    
 extern char **environ;                   // environment array
 
@@ -79,8 +79,8 @@ int copy(char * src, char * dst){
     error("couldn't open source file");
     ret |= 1;
   } else {
-    d = open(dst, O_CREAT | O_WRONLY | O_TRUNC, RW_ALL);
-    // RW_ALL  means everyone has rw priveleges
+    d = open(dst, O_CREAT | O_WRONLY | O_TRUNC, ALL_PERM);
+    // ALL_PERM  means everyone has rw priveleges
     if(d==-1){
       error("couldn't open destination file");
       ret |= 2;
@@ -127,7 +127,7 @@ int mimic(char * src, char * dst, int recursive){
     if(recursive){
       //TODO: RECURSE
     } else if (!firstinsrc) {
-      ret = mkdir(srcindst, RW_ALL);
+      ret = mkdir(srcindst, ALL_PERM);
     } else {
       error("src folder non-empty and -r not supplied; nothing done.");
       ret = EXIT_FAILURE;
@@ -138,7 +138,7 @@ int mimic(char * src, char * dst, int recursive){
     if(recursive){
       //TODO: RECURSE
     } else if (!firstinsrc) {
-      ret = mkdir(dst, RW_ALL);
+      ret = mkdir(dst, ALL_PERM);
     } else {
       error("src folder non-empty and -r not supplied; nothing done.");
       ret = EXIT_FAILURE;
@@ -366,7 +366,7 @@ int main (int argc, char ** argv)
 
 	if(chk("mkdirz")){ //"mkdirz" command
 	  if(args[1]){
-	    if(mkdir(args[1], RW_ALL) != 0){
+	    if(mkdir(args[1], ALL_PERM) != 0){
 	      error("couldn't mkdirz");
 	    }
 	  } else {
