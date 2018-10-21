@@ -105,44 +105,7 @@ int copy(char * src, char * dst){
   return ret;
 }
 
-int mimic(char ** args){
-  //args must be terminated by a null string
-
-  //parse args
-  int recursive = 0;
-  char * src = NULL;
-  char * dst = NULL;
-  int i = 1; //args 0 is name of command (morph or mimic)
-  while (args[i]){
-    if(!strcmp("-r",args[i])){
-      if(recursive == 1){
-	error("recursive flag specified multiple times"); //supererogatory error checking
-	recursive = 2;
-      } else {
-	recursive = 1;
-      }
-    } else {
-      if(!src){
-	src = args[i];
-      } else if (!dst){
-	dst = args[i];
-      } else {
-	error("too many arguments!");
-	return EXIT_FAILURE;
-      }
-    }
-    i++;
-  }
-  if(!src || !dst){
-    fprintf(stderr, "Usage: %s [-r] src dst\n", args[0]);
-    return EXIT_FAILURE;
-  }
-  //check for one error, unnecessarily tbh
-  if(access(src,R_OK)){ //access returns 0 if OK, so the following happens if not OK 
-    error("can't read src");
-    return EXIT_FAILURE;
-  }
-
+int mimic(char * src, char * dst, int recursive){
   int ret = 0;  
   //TODO: use nftw for new functionality
   DIR * srcdir = opendir(src);
@@ -188,6 +151,45 @@ int mimic(char ** args){
   return ret;
 }
 
+int parsemimic(char ** args){
+  //args must be terminated by a null string
+
+  //parse args
+  int recursive = 0;
+  char * src = NULL;
+  char * dst = NULL;
+  int i = 1; //args 0 is name of command (morph or mimic)
+  while (args[i]){
+    if(!strcmp("-r",args[i])){
+      if(recursive == 1){
+	error("recursive flag specified multiple times"); //supererogatory error checking
+	recursive = 2;
+      } else {
+	recursive = 1;
+      }
+    } else {
+      if(!src){
+	src = args[i];
+      } else if (!dst){
+	dst = args[i];
+      } else {
+	error("too many arguments!");
+	return EXIT_FAILURE;
+      }
+    }
+    i++;
+  }
+  if(!src || !dst){
+    fprintf(stderr, "Usage: %s [-r] src dst\n", args[0]);
+    return EXIT_FAILURE;
+  }
+  //check for one error, unnecessarily tbh
+  if(access(src,R_OK)){ //access returns 0 if OK, so the following happens if not OK 
+    error("can't read src");
+    return EXIT_FAILURE;
+  }
+  return mimic(src, dst, recursive);
+}
 
 int fe(const char * command, char ** args){
   //replacement fn for system
@@ -309,7 +311,7 @@ int main (int argc, char ** argv)
 
 	//the real meat of the assignment here (the libc calls):
 	if(chk("mimic")){ //"mimic" command
-	  mimic(args); //mimic checks for correct args
+	  parsemimic(args); //parsemimic checks for correct args
 	  continue;
 	}
 
@@ -323,7 +325,7 @@ int main (int argc, char ** argv)
 	}
 
 	if(chk("morph")){ //"morph"
-	  if (!mimic(args)){ //mimic checks args
+	  if (!parsemimic(args)){ //parsemimic checks args
 	    //only erase if the copy worked
 	    erase(args[1]);
 	  }
