@@ -1,0 +1,5 @@
+#!/bin/bash
+if (cd ..; make); then echo failure; exit 1; fi
+(cd ..; ./project? testing/"$1") > "$1".my.txt
+sdiff -b -B "$(basename $1 .txt)".out.txt "$1".my.txt
+

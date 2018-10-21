@@ -63,6 +63,20 @@ int erase(char * target){
   }
 }
 
+int eraser(char * target){
+  int ret = 0;
+  DIR * dir = opendir(target);
+  if (!dir){ //not a dir, erase as normal
+    ret |= erase(target);
+  }
+  struct dirent * ent;
+  while( (ent = readdir(dir)) ){
+    ret |= eraser(ent->d_name);
+  }
+  ret |= erase(target);
+  return ret;
+}
+
 int copy(char * src, char * dst){
   //copy src file to dst file
   int ret = 0; //error value to return 
@@ -193,7 +207,7 @@ int parsemimic(char ** args){
 
 int fe(const char * command, char ** args){
   //replacement fn for system
-  //forks and execs
+  //forks and execs, and redirects (< > >>)
   //function adapted from example code in
   //https://oudalab.github.io/cs3113fa18/projects/project2.html#your-todos
   //args should almost always be called with the value args in the code below
@@ -201,20 +215,34 @@ int fe(const char * command, char ** args){
   int pid;
   switch( pid = fork() ){ 
   case -1:
-    error("couldn't fork"); 
-  case 0:                 // child 
+    error("couldn't fork");
+    break;
+  case 0:
+    //child
+    //freopen according to redirection operators
+    int i;
+    i = 0;
+    char * cmd;
+    while(cmd = args[++i]){
+      //it's possible that each of these should null out the operator entry
+      //so vp doesn't hit them.
+      //don't know yet, need to test more
+      if(!strcmp(cmd, "<")){
+	freopen(args[i+1], "r", stdin);
+      }else if(!strcmp(cmd, ">")){
+	freopen(args[i+1], "w", stdout);	
+      }else if(!strcmp(cmd, ">>")){
+	freopen(args[i+1], "a", stdout);
+      }
+    }
     execvp(command, args); 
     error("couldn't exec");
     exit(EXIT_FAILURE);
+    break;
   default:                // parent
     return waitpid(pid, NULL, WUNTRACED); //here we pass in NULL instead of the address of an int because this is the correct way to indicate we don't  need the int.
+    break;
   }
-}
-
-int fen(char * command){
-  //call fe with no arguments
-  char * args[] = {command, NULL};
-  return fe(command, args);
 }
 
 int main (int argc, char ** argv)
@@ -231,6 +259,7 @@ int main (int argc, char ** argv)
   char * args[MAX_ARGS];                     // pointers to arg strings
   char ** arg;                               // working pointer thru args
   char * prompt = "==>" ;                    // shell prompt
+  char cwd[MAX_BUFF];                       //buffer to store (then print) cwd
   char * originalstr;                    // copy of original str to print in ditto
   int prevlineempty=0; //bool we use to keep from double-printing prompts like an idiot
 
@@ -239,7 +268,7 @@ int main (int argc, char ** argv)
   while (!feof(stdin)) {
     // get command line from input
     if(!prevlineempty || !isbatch){
-      printf("%s%s", getenv("PWD"), prompt);   // write enhanced prompt
+      printf("%s%s", getcwd(cwd, sizeof(cwd));, prompt);   // write enhanced prompt
     }
     prevlineempty=1;
 
@@ -265,7 +294,8 @@ int main (int argc, char ** argv)
 	// commands are listed/checked here in the order the spec specs them
 
 	if (!strcmp(args[0],"wipe")) { // "clear" command
-	  fen("clear");
+	  args[0] = "clear";
+	  fe(args[0],args);
 	  continue;
 	}
             
@@ -317,7 +347,11 @@ int main (int argc, char ** argv)
 
 	if(chk("erase")){ //"erase" command
 	  if(args[1]){
-	    erase(args[1]);
+	    if (args[2] && !strcmp(args[1],"-r")){
+	      eraser(args[2]);
+	    } else {
+	      erase(args[1]);
+	    }
 	  } else {
 	    error("erase requires one argument: target.");
 	  } 
@@ -327,7 +361,11 @@ int main (int argc, char ** argv)
 	if(chk("morph")){ //"morph"
 	  if (!parsemimic(args)){ //parsemimic checks args
 	    //only erase if the copy worked
-	    erase(args[1]);
+	    if (args[2] && !strcmp(args[1],"-r")){
+	      eraser(args[2]);
+	    } else {
+	      erase(args[1]);
+	    }
 	  }
 	  continue;
 	}

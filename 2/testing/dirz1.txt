@@ -1,0 +1,11 @@
+mkdirz dirztest
+chdir dirztest
+pwd
+filez
+mkdirz dirztest2
+filez
+rmdirz dirztest2
+filez
+chdir ..
+rmdirz dirztest2
+rmdirz dirztest

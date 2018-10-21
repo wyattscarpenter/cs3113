@@ -1,0 +1,10 @@
+mkdirz toexecute
+echo echo $$ > toexecute/ppid
+chmod +x toexecute/ppid
+toexecute/ppid > toexecute/pid1
+toexecute/ppid > toexecute/pid2
+diff -q toexecute/pid1 toexecute/pid2
+erase toexecute/ppid
+erase toexecute/pid1
+erase toexecute/pid2
+rmdirz toexecute

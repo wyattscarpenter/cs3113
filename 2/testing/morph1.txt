@@ -1,0 +1,17 @@
+mkdir hello
+chdir hello
+mkdir t1
+mkdir t2
+mkdir t3
+mkdir t4
+tree
+echo "hello" > t1/1.txt
+mkdir t2/t1
+mimic t1/1.txt t2/t1
+tree
+mkdir t4/t1
+mimic t1/1.txt t4/t1/
+tree
+morph -r t4/t1 t3
+tree
+cat t3/t1/1.txt

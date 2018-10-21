@@ -1,0 +1,55 @@
+/projects/2==>mkdir hello
+/projects/2==>chdir hello
+hello==>mkdir t1
+hello==>mkdir t2
+hello==>mkdir t3
+hello==>mkdir t4
+hello==>tree
+.
+├── t1
+├── t2
+│   └── t1
+├── t3
+└── t4
+    └── t1
+
+6 directories, 0 files
+hello==>echo "hello" > t1/1.txt
+"hello" > t1/1.txt
+hello==>mkdir t2/t1
+hello==>mimic t1/1.txt t2/t1
+hello==>tree
+.
+├── t1
+├── t2
+│   └── t1
+├── t3
+└── t4
+    └── t1
+
+6 directories, 0 files
+hello==>mkdir t4/t1
+hello==>mimic t1/1.txt t4/t1/
+hello==>tree
+.
+├── t1
+├── t2
+│   └── t1
+├── t3
+└── t4
+    └── t1
+
+6 directories, 0 files
+hello==>morph -r t4/t1 t3
+hello==>tree
+.
+├── t1
+├── t2
+│   └── t1
+├── t3
+└── t4
+    └── t1
+
+6 directories, 0 files
+hello==>cat t3/t1/1.txt
+hello==>
