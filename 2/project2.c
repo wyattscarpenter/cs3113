@@ -41,6 +41,9 @@ extern char **environ;                   // environment array
 int error(char * msg){
   return fprintf(stderr, "%s\n", msg);
 }
+int streq(char * l, char * r){
+  return !strcmp(l,r);
+}
 
 void * tmptr; //you can clear this to avoid memory leaks sometimes.
 char * slash(char * l, char * r){
@@ -71,7 +74,14 @@ int eraser(char * target){
   }
   struct dirent * ent;
   while( (ent = readdir(dir)) ){
-    ret |= eraser(ent->d_name);
+    char * name = ent->d_name;
+    if (streq(name, ".") || streq(name, "..")){
+      continue;
+    } else {
+      fprintf(stderr, "eraser on ent %s", name);
+      ret |= eraser(slash(target, name));
+      free(tmptr);
+    }
   }
   ret |= erase(target);
   return ret;
@@ -213,6 +223,7 @@ int fe(const char * command, char ** args){
   //args should almost always be called with the value args in the code below
   //args[0] is the name of the program, as is convention. 
   int pid;
+  int i = 0;
   switch( pid = fork() ){ 
   case -1:
     error("couldn't fork");
@@ -220,19 +231,18 @@ int fe(const char * command, char ** args){
   case 0:
     //child
     //freopen according to redirection operators
-    int i;
-    i = 0;
-    char * cmd;
-    while(cmd = args[++i]){
-      //it's possible that each of these should null out the operator entry
-      //so vp doesn't hit them.
-      //don't know yet, need to test more
-      if(!strcmp(cmd, "<")){
+    while( (args[++i]) ){
+      //each of these nulls out the operator entry
+      //so execvp doesn't hit them when we actually run it
+      if(!strcmp(args[i], "<")){
 	freopen(args[i+1], "r", stdin);
-      }else if(!strcmp(cmd, ">")){
+	args[i] = NULL;
+      }else if(!strcmp(args[i], ">")){
 	freopen(args[i+1], "w", stdout);	
-      }else if(!strcmp(cmd, ">>")){
+	args[i] = NULL;
+      }else if(!strcmp(args[i], ">>")){
 	freopen(args[i+1], "a", stdout);
+	args[i] = NULL;
       }
     }
     execvp(command, args); 
@@ -243,6 +253,8 @@ int fe(const char * command, char ** args){
     return waitpid(pid, NULL, WUNTRACED); //here we pass in NULL instead of the address of an int because this is the correct way to indicate we don't  need the int.
     break;
   }
+  error("something went wrong in fe");
+  return EXIT_FAILURE;
 }
 
 int main (int argc, char ** argv)
@@ -259,7 +271,7 @@ int main (int argc, char ** argv)
   char * args[MAX_ARGS];                     // pointers to arg strings
   char ** arg;                               // working pointer thru args
   char * prompt = "==>" ;                    // shell prompt
-  char cwd[MAX_BUFF];                       //buffer to store (then print) cwd
+  char cwd[MAX_BUFFER];                       //buffer to store (then print) cwd
   char * originalstr;                    // copy of original str to print in ditto
   int prevlineempty=0; //bool we use to keep from double-printing prompts like an idiot
 
@@ -268,7 +280,7 @@ int main (int argc, char ** argv)
   while (!feof(stdin)) {
     // get command line from input
     if(!prevlineempty || !isbatch){
-      printf("%s%s", getcwd(cwd, sizeof(cwd));, prompt);   // write enhanced prompt
+      printf("%s%s", getcwd(cwd, sizeof(cwd)), prompt);   // write enhanced prompt
     }
     prevlineempty=1;
 
