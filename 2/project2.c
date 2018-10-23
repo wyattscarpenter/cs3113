@@ -39,7 +39,7 @@
 extern char **environ;                   // environment array
 
 //some helper functions:
-int error(char * msg){
+int error(const char * msg){
   return fprintf(stderr, "%s\n", msg);
 }
 int streq(char * l, char * r){
@@ -47,7 +47,7 @@ int streq(char * l, char * r){
 }
 
 void * tmptr; //you can clear this to avoid memory leaks sometimes.
-char * slash(char * l, char * r){
+char * slash(const char * l, const char * r){
   char * new = malloc(strlen(l)+strlen(r)+4); //4 seems like a good margin
   strcat(new,l);
   strcat(new,"/");
@@ -58,7 +58,7 @@ char * slash(char * l, char * r){
 
 //some functions to manipulate files:
 
-int erase(char * target){
+int erase(const char * target){
   if(remove(target)){
     fprintf(stderr, "Couldn't erase %s\n", target);
     return -1;
@@ -67,7 +67,9 @@ int erase(char * target){
   }
 }
 
-int eraser(char * target){
+int eraser(const char * target){
+  error("eraser:");
+  error(target);
   int ret = 0;
   DIR * dir = opendir(target);
   if (!dir){ //not a dir, erase as normal
@@ -88,7 +90,7 @@ int eraser(char * target){
   return ret;
 }
 
-int copy(char * src, char * dst){
+int copy(const char * src, const char * dst){
   //copy src file to dst file
   int ret = 0; //error value to return 
   int s; //source file descriptor
@@ -130,19 +132,21 @@ int copy(char * src, char * dst){
   return ret;
 }
 
-int mimic(char * src, char * dst, int recursive){
+int mimic(const char * src, const char * dst, int recursive){
   int ret = 0;  
   //TODO: use nftw for new functionality
   DIR * srcdir = opendir(src);
   DIR * dstdir = opendir(dst);
   
   char * bsrc = malloc(strlen(src)+1);
-  basename(strcpy(bsrc,src));
+  bsrc = basename(strcpy(bsrc,src));
   char * ddst = malloc(strlen(dst)+1);
-  dirname(strcpy(ddst,dst));
-  char * srcindst = slash(dst,bsrc);
+  ddst = dirname(strcpy(ddst,dst));
+  char * pdst = malloc(strlen(ddst)+1);
+  pdst = dirname(strcpy(pdst,ddst));
+  DIR * pdstdir = opendir(ddst);
 
-  DIR * pdstdir = opendir(dirname(dst));
+  char * srcindst = slash(dst,bsrc);
   //if these are not dirs, the pointers will be null. Also if they don't exist.
   struct dirent * firstinsrc = NULL;
   if(srcdir){
@@ -171,8 +175,8 @@ int mimic(char * src, char * dst, int recursive){
   } else {
     ret = copy(src, dst);
   }
-  free(srcindst);
-  free(bsrc);
+  //free(srcindst);
+  //free(bsrc);
   return ret;
 }
 
