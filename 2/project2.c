@@ -72,21 +72,20 @@ int eraser(const char * target){
   error(target);
   int ret = 0;
   DIR * dir = opendir(target);
-  if (!dir){ //not a dir, erase as normal
-    ret |= erase(target);
-  }
-  struct dirent * ent;
-  while( (ent = readdir(dir)) ){
-    char * name = ent->d_name;
-    if (streq(name, ".") || streq(name, "..")){
-      continue;
-    } else {
-      fprintf(stderr, "eraser on ent %s", name);
-      ret |= eraser(slash(target, name));
-      //free(tmptr);
+  if (dir){ //erase within dir
+    struct dirent * ent;
+    while( (ent = readdir(dir)) ){
+      char * name = ent->d_name;
+      if (streq(name, ".") || streq(name, "..")){
+	continue;
+      } else {
+	fprintf(stderr, "eraser on ent %s", name);
+	ret |= eraser(slash(target, name));
+	//free(tmptr);
+      }
     }
   }
-  ret |= erase(target);
+  ret |= erase(target); //it's either empty or a file now
   return ret;
 }
 
