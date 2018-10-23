@@ -53,8 +53,11 @@ struct dirent * getent(DIR * dirp){
   return ent; //liek readdir, returns NULL if error or we reach the end
 }
 
-void * tmptr; //you can clear this to avoid memory leaks sometimes.
-char * slash(const char * l, const char * r){
+void * tmptr; //"temporary pointer" pronounced "tempter" like the devil.
+              //you can clear this to avoid memory leaks sometimes,
+              //but it's brittle and works poorly with eg recursion
+              //TODO: replace this with an arena memory pool that can be cleared after each command
+char * slash(const char * l, const char * r){ //this fn mallocs a string with the value l/r
   char * new = malloc(strlen(l)+strlen(r)+4); //4 seems like a good margin
   strcat(new,l);
   strcat(new,"/");
@@ -82,9 +85,9 @@ int eraser(const char * target){ //erase recursive
     //erase within dir
     struct dirent * ent;
     while( (ent = getent(dir)) ){
-      char * name = ent->d_name;
-	ret |= eraser(slash(target, name));
-	//free(tmptr);
+      char * s = slash(target, ent->d_name);
+      ret |= eraser(s);
+      free(s);
     }
   }
   ret |= erase(target); //it's either empty or a file now
@@ -447,7 +450,6 @@ int main (int argc, char ** argv)
 	}
 	
 	// else pass command onto OS
-	arg = args;
 	fe(args[0],args); //run cmd with rest of args array
       }
     }
