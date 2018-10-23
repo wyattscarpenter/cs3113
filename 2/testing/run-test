@@ -1,5 +1,5 @@
 #!/bin/bash
 base=$(basename "$1" .txt)
 (cd ..; ./project? testing/"$1") > "$base".my.txt
-sdiff -b -B "$base".out.txt "$base".my.txt
+diff -b -B "$base".out.txt "$base".my.txt
 
