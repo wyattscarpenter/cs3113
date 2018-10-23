@@ -45,6 +45,14 @@ int error(const char * msg){
 int streq(char * l, char * r){
   return !strcmp(l,r);
 }
+struct dirent * getent(DIR * dirp){
+  //like readdir, but without the . and .. entries
+  struct dirent * ent;
+  do{
+    ent = readdir(dirp);
+  }while(streq(ent->d_name,".") || streq(ent->d_name,".."));
+  return ent;
+}
 
 void * tmptr; //you can clear this to avoid memory leaks sometimes.
 char * slash(const char * l, const char * r){
@@ -74,15 +82,11 @@ int eraser(const char * target){
   DIR * dir = opendir(target);
   if (dir){ //erase within dir
     struct dirent * ent;
-    while( (ent = readdir(dir)) ){
+    while( (ent = getent(dir)) ){
       char * name = ent->d_name;
-      if (streq(name, ".") || streq(name, "..")){
-	continue;
-      } else {
 	fprintf(stderr, "eraser on ent %s", name);
 	ret |= eraser(slash(target, name));
 	//free(tmptr);
-      }
     }
   }
   ret |= erase(target); //it's either empty or a file now
@@ -132,6 +136,8 @@ int copy(const char * src, const char * dst){
 }
 
 int mimic(const char * src, const char * dst, int recursive){
+  //this is not a great function. It's very complex and it leaks memory like a doomed ship.
+  //but it does the job. probably.
   int ret = 0;  
   //TODO: use nftw for new functionality
   DIR * srcdir = opendir(src);
@@ -149,11 +155,13 @@ int mimic(const char * src, const char * dst, int recursive){
   //if these are not dirs, the pointers will be null. Also if they don't exist.
   struct dirent * firstinsrc = NULL;
   if(srcdir){
-    firstinsrc = readdir(srcdir); //null on empty dir or error, we assume empty
+    firstinsrc = getent(srcdir); //null on empty dir or error, we assume empty
   }
   if(srcdir && dstdir){
     if(recursive){
-      //TODO: RECURSE
+      do{
+	mimic(slash(src,firstinsrc->d_name),slash(dst,firstinsrc->d_name), recursive);
+      }while( (firstinsrc = getent(srcdir)) );
     } else if (!firstinsrc) {
       ret = mkdir(srcindst, ALL_PERM);
     } else {
@@ -164,7 +172,10 @@ int mimic(const char * src, const char * dst, int recursive){
     ret = copy(src, srcindst);
   } else if (srcdir && pdstdir){
     if(recursive){
-      //TODO: RECURSE
+      ret = mkdir(dst, ALL_PERM);
+      do{
+	mimic(slash(src,firstinsrc->d_name), slash(dst,firstinsrc->d_name), recursive);
+      }while( (firstinsrc = getent(srcdir)) );
     } else if (!firstinsrc) {
       ret = mkdir(dst, ALL_PERM);
     } else {
