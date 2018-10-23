@@ -41,16 +41,16 @@ extern char **environ;                   // environment array
 int error(const char * msg){
   return fprintf(stderr, "%s\n", msg);
 }
-int streq(char * l, char * r){
-  return !strcmp(l,r);
+int streq(char * l, char * r){ //check if strings equal
+  return !strcmp(l,r); //returns true if equal, false if not equal
 }
 struct dirent * getent(DIR * dirp){
-  //like readdir, but without the . and .. entries
+  //exactly like readdir, but without the . and .. entries
   struct dirent * ent;
   do{
     ent = readdir(dirp);
   }while( ent && (streq(ent->d_name,".") || streq(ent->d_name,"..")) );
-  return ent;
+  return ent; //liek readdir, returns NULL if error or we reach the end
 }
 
 void * tmptr; //you can clear this to avoid memory leaks sometimes.
@@ -74,10 +74,12 @@ int erase(const char * target){
   }
 }
 
-int eraser(const char * target){
+int eraser(const char * target){ //erase recursive
   int ret = 0;
-  DIR * dir = opendir(target);
-  if (dir){ //erase within dir
+  DIR * dir = opendir(target); //will be null if target isn't a dir 
+  if (dir){
+    //it is a dir
+    //erase within dir
     struct dirent * ent;
     while( (ent = getent(dir)) ){
       char * name = ent->d_name;
@@ -135,21 +137,23 @@ int mimic(const char * src, const char * dst, int recursive){
   //this is not a great function. It's very complex and it leaks memory like a doomed ship.
   //but it does the job. probably.
   int ret = 0;  
-  //TODO: use nftw for new functionality
+
+  //if these are not dirs or don't exist, the pointers will be null.
   DIR * srcdir = opendir(src);
   DIR * dstdir = opendir(dst);
-  
-  char * bsrc = malloc(strlen(src)+1);
-  bsrc = basename(strcpy(bsrc,src));
-  char * ddst = malloc(strlen(dst)+1);
-  ddst = dirname(strcpy(ddst,dst));
-  char * pdst = malloc(strlen(ddst)+1);
-  pdst = dirname(strcpy(pdst,ddst));
-  DIR * pdstdir = opendir(ddst);
 
+  //allocate all the strings we might need, and populate some pointers
+  //note that basename and dirname modify in place,
+  //so we need to make new copies of our strings for them.
+  char * bsrc = malloc(strlen(src)+1); //the base of the src
+  bsrc = basename(strcpy(bsrc,src));
+  char * ddst = malloc(strlen(dst)+1); //the dir of the dst
+  ddst = dirname(strcpy(ddst,dst));
+  DIR * pdstdir = opendir(ddst);            //test for existence of pdst
   char * srcindst = slash(dst,bsrc);
-  //if these are not dirs, the pointers will be null. Also if they don't exist.
   struct dirent * firstinsrc = NULL;
+
+  //do all the logic. check the spec for the gnarly details
   if(srcdir){
     firstinsrc = getent(srcdir); //null on empty dir or error, we assume empty
   }
@@ -191,7 +195,7 @@ int mimic(const char * src, const char * dst, int recursive){
   return ret;
 }
 
-int parsemimic(char ** args){
+int parsemimic(char ** args){ //parses args array and does a mimic call thereby
   //args must be terminated by a null string
 
   //parse args
@@ -234,7 +238,7 @@ int parsemimic(char ** args){
 int fe(const char * command, char ** args){
   //replacement fn for system
   //forks and execs, and redirects (< > >>)
-  //function adapted from example code in
+  //function adapted, with heavy modification from example code in
   //https://oudalab.github.io/cs3113fa18/projects/project2.html#your-todos
   //args should almost always be called with the value args in the code below
   //args[0] is the name of the program, as is convention. 
@@ -276,8 +280,9 @@ int fe(const char * command, char ** args){
 int main (int argc, char ** argv)
 {
   setbuf(stdout, NULL);
-  int isbatch = 0; //flag that indicates  if we are in a batch script
+  int isbatch = 0; //flag that indicates if we are in a batch script
   //would be a bool that's not truly C style
+  
   //if argument provided, read from it as a batchfile:
   if(argc>1){ //executable is of course the 1st arg
     freopen(argv[1],"r",stdin); //stdin is now reading from the file! yay!
@@ -289,7 +294,7 @@ int main (int argc, char ** argv)
   char * prompt = "==>" ;                    // shell prompt
   char cwd[MAX_BUFFER];                       //buffer to store (then print) cwd
   char * originalstr;                    // copy of original str to print in ditto
-  int prevlineempty=0; //bool we use to keep from double-printing prompts like an idiot
+  int prevlineempty=0; //flag we use to keep from double-printing prompts like an idiot
 
   // keep reading input until "esc" command or eof of redirected input
 
