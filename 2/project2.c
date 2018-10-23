@@ -176,14 +176,19 @@ int mimic(const char * src, const char * dst, int recursive){
     ret = copy(src, srcindst);
   } else if (srcdir && pdstdir){
     if(recursive){
-      ret = mkdir(dst, ALL_PERM);
-      do{
-	char * nextsrc = slash(src,firstinsrc->d_name);
-	char * nextdst = slash(dst,firstinsrc->d_name);
-	mimic(nextsrc, nextdst, recursive);
-	free(nextsrc);
-	free(nextdst);
-      }while( (firstinsrc = getent(srcdir)) );
+      if( (ret = mkdir(dst, ALL_PERM)) ){
+	do{
+	  char * nextsrc = slash(src,firstinsrc->d_name);
+	  char * nextdst = slash(dst,firstinsrc->d_name);
+	  mimic(nextsrc, nextdst, recursive);
+	  free(nextsrc);
+	  free(nextdst);
+	}while( (firstinsrc = getent(srcdir)) );
+      } else {
+	error("couldn't mkdir in mimic");
+	perror("dst");
+	return ret;
+      }
     } else if (!firstinsrc) {
       ret = mkdir(dst, ALL_PERM);
     } else {
