@@ -150,23 +150,24 @@ int mimic(const char * src, const char * dst, int recursive){
   char * ddst = dirname(strcpy(copyofdst,dst)); //should NOT  be freed
   DIR * pdstdir = opendir(ddst);       //test for existence of pdst
   char * srcindst = slash(dst,bsrc);
-  struct dirent * firstinsrc = NULL;
+  struct dirent * srcent = NULL;
 
   //do all the logic. check the spec for the gnarly details
   if(srcdir){
-    firstinsrc = getent(srcdir); //null on empty dir or error, we assume empty
+    srcent = getent(srcdir); //null on empty dir or error, we assume empty
   }
   if(srcdir && dstdir){
     if(recursive){
       ret = mkdir(srcindst, ALL_PERM);
-      do{
-	char * nextsrc = slash(src,firstinsrc->d_name);
-	char * nextdst = slash(srcindst,firstinsrc->d_name);
+      while (srcent){
+	char * nextsrc = slash(src,srcent->d_name);
+	char * nextdst = slash(srcindst,srcent->d_name);
 	mimic(nextsrc, nextdst, recursive);
 	free(nextsrc);
 	free(nextdst);
-      }while( (firstinsrc = getent(srcdir)) );
-    } else if (!firstinsrc) {
+	srcent = getent(srcdir);
+      }
+    } else if (!srcent) {
       ret = mkdir(srcindst, ALL_PERM);
     } else {
       error("src folder non-empty and -r not supplied; nothing done.");
@@ -177,19 +178,20 @@ int mimic(const char * src, const char * dst, int recursive){
   } else if (srcdir && pdstdir){
     if(recursive){
       if( !(ret = mkdir(dst, ALL_PERM)) ){
-	do{
-	  char * nextsrc = slash(src,firstinsrc->d_name);
-	  char * nextdst = slash(dst,firstinsrc->d_name);
+	while(srcent){
+	  char * nextsrc = slash(src,srcent->d_name);
+	  char * nextdst = slash(dst,srcent->d_name);
 	  mimic(nextsrc, nextdst, recursive);
 	  free(nextsrc);
 	  free(nextdst);
-	}while( (firstinsrc = getent(srcdir)) );
+	  srcent = getent(srcdir);
+	}
       } else {
 	error("couldn't mkdir in mimic");
 	perror(dst);
 	return ret;
       }
-    } else if (!firstinsrc) {
+    } else if (!srcent) {
       ret = mkdir(dst, ALL_PERM);
     } else {
       error("src folder non-empty and -r not supplied; nothing done.");
