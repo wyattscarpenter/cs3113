@@ -174,7 +174,9 @@ int mimic(const char * src, const char * dst, int recursive){
   } else if (srcdir && pdstdir){
     if(recursive){
       if( (ret = mkdir(dst, ALL_PERM)) ){
-	mimic(src, dst, recursive);
+	do{
+	mimic(slash(src,firstinsrc->d_name),slash(dst,firstinsrc->d_name), recursive);
+      }while( (firstinsrc = getent(srcdir)) );
       } else{
 	error("couldn't mkdir in mimic");
 	return ret;
