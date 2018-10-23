@@ -57,4 +57,6 @@
 6 directories, 3 files
 /projects/2/hello==>cat t3/t1/1.txt
 "hello"
-/projects/2/hello==>
+/projects/2/hello==>chdir ..
+/projects/2==>rm -r hello
+/projects/2==>

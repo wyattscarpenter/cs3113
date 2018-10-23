@@ -1,14 +1,14 @@
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2==>mkdirz dirztest
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2==>chdir dirztest
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest==>pwd
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest==>filez
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest==>mkdirz dirztest2
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest==>filez
+/projects/2==>mkdirz dirztest
+/projects/2==>chdir dirztest
+/projects/2/dirztest==>pwd
+/projects/2/dirztest
+/projects/2/dirztest==>filez
+/projects/2/dirztest==>mkdirz dirztest2
+/projects/2/dirztest==>filez
 dirztest2
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest==>rmdirz dirztest2
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest==>filez
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2/dirztest==>chdir ..
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2==>rmdirz dirztest2
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2==>rmdirz dirztest
-/mnt/c/Users/wyatt/Desktop/files/ou/18f/cs 3113 intro to operating systems/projects/2==>
+/projects/2/dirztest==>rmdirz dirztest2
+/projects/2/dirztest==>filez
+/projects/2/dirztest==>chdir ..
+/projects/2==>rmdirz dirztest2
+/projects/2==>rmdirz dirztest
+/projects/2==>
