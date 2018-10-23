@@ -34,6 +34,7 @@
 #define MAX_ARGS 64                            // max # args
 #define SEPARATORS " \t\n"                     // token sparators
 #define ALL_PERM 00777
+#define free(X) 
    
 extern char **environ;                   // environment array
 
