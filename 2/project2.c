@@ -53,16 +53,12 @@ struct dirent * getent(DIR * dirp){
   return ent; //liek readdir, returns NULL if error or we reach the end
 }
 
-void * tmptr; //"temporary pointer" pronounced "tempter" like the devil.
-              //you can clear this to avoid memory leaks sometimes,
-              //but it's brittle and works poorly with eg recursion
-              //TODO: replace this with an arena memory pool that can be cleared after each command
 char * slash(const char * l, const char * r){ //this fn mallocs a string with the value l/r
   char * new = malloc(strlen(l)+strlen(r)+4); //4 seems like a good margin
+  new[0] = '\0'; // let's make new point to a null string
   strcat(new,l);
   strcat(new,"/");
   strcat(new,r);
-  tmptr = new;
   return new;
 }
 
