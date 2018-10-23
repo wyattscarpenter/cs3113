@@ -33,10 +33,10 @@
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
 #define SEPARATORS " \t\n"                     // token sparators
-#define ALL_PERM 00777
-#define free(X) 
+#define ALL_PERM 00777                         // maximally permissive permissions
+#define free(X)                                // define free to nothing to avoid segfaults
    
-extern char **environ;                   // environment array
+extern char **environ;                         // environment array
 
 //some helper functions:
 int error(const char * msg){
