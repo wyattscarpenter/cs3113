@@ -143,10 +143,11 @@ int mimic(const char * src, const char * dst, int recursive){
   //allocate all the strings we might need, and populate some pointers
   //note that basename and dirname modify in place,
   //so we need to make new copies of our strings for them.
-  char * bsrc = malloc(strlen(src)+1); //the base of the src
-  bsrc = basename(strcpy(bsrc,src));
-  char * ddst = malloc(strlen(dst)+1); //the dir of the dst
-  ddst = dirname(strcpy(ddst,dst));
+  //note also that one should not free a pointer from base/dirname
+  char * copyofsrc = malloc(strlen(src)+1); //the base of the src
+  char * bsrc = basename(strcpy(copyofsrc,src)); //should NOT  be freed
+  char * copyofdst = malloc(strlen(dst)+1); //the dir of the dst
+  char * ddst = dirname(strcpy(copyofdst,dst)); //should NOT  be freed
   DIR * pdstdir = opendir(ddst);       //test for existence of pdst
   char * srcindst = slash(dst,bsrc);
   struct dirent * firstinsrc = NULL;
@@ -198,9 +199,9 @@ int mimic(const char * src, const char * dst, int recursive){
   }
 
   //free all those things from before
-  free(bsrc);
-  //free(ddst);
-  //free(srcindst);
+  free(copyofsrc);
+  free(copyofdst);
+  free(srcindst);
   
   return ret;
 }
