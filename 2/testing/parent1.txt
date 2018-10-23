@@ -1,0 +1,11 @@
+mkdir cleandir
+chdir cleandir
+mkdir t1 t2 t1/t1son t1/daughter t1/heir
+echo golly > t1/t1son/t.txt
+echo gosh > t1/t1son/u.txt
+echo gee > t1/t1daughter/w
+tree
+morph -r t1 t2/t2son
+tree
+chdir ..
+rm -r cleandir
