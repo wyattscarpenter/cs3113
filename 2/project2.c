@@ -137,8 +137,8 @@ int copy(const char * src, const char * dst){
 }
 
 int mimic(const char * src, const char * dst, int recursive){
-  //this is not a great function. It's very complex and it leaks memory like a doomed ship.
-  //but it does the job. probably.
+  //This is not a great function; it's too complex.
+  //But it does the job. Probably.
   int ret = 0;  
 
   //if these are not dirs or don't exist, the pointers will be null.
@@ -164,7 +164,11 @@ int mimic(const char * src, const char * dst, int recursive){
     if(recursive){
       ret = mkdir(srcindst, ALL_PERM);
       do{
-	mimic(slash(src,firstinsrc->d_name),slash(srcindst,firstinsrc->d_name), recursive);
+	char * tmp1;
+	char * tmp2;
+	mimic( (tmp1 = slash(src,firstinsrc->d_name)) , (tmp2 = slash(srcindst,firstinsrc->d_name)) , recursive);
+	free(tmp1);
+	free(tmp2);
       }while( (firstinsrc = getent(srcdir)) );
     } else if (!firstinsrc) {
       ret = mkdir(srcindst, ALL_PERM);
@@ -178,9 +182,13 @@ int mimic(const char * src, const char * dst, int recursive){
     if(recursive){
       if( (ret = mkdir(dst, ALL_PERM)) ){
 	do{
-	mimic(slash(src,firstinsrc->d_name),slash(dst,firstinsrc->d_name), recursive);
-      }while( (firstinsrc = getent(srcdir)) );
-      } else{
+	  char * tmp1;
+	  char * tmp2;
+	  mimic( (tmp1 =slash(src,firstinsrc->d_name)) , (tmp2 = slash(dst,firstinsrc->d_name)) , recursive);
+	  free(tmp1);
+	  free(tmp2);
+	}while( (firstinsrc = getent(srcdir)) );
+      } else {
 	error("couldn't mkdir in mimic");
 	return ret;
       }
@@ -193,8 +201,12 @@ int mimic(const char * src, const char * dst, int recursive){
   } else {
     ret = copy(src, dst);
   }
-  //free(srcindst);
-  //free(bsrc);
+
+  //free all those things from before
+  free(bsrc);
+  free(ddst);
+  free(srcindst);
+  
   return ret;
 }
 
