@@ -7,13 +7,11 @@
 /projects/2/hello==>tree
 .
 ├── t1
-│   └── 1.txt
 ├── t2
-│   └── t1
 ├── t3
 └── t4
 
-5 directories, 1 file
+4 directories, 0 files
 /projects/2/hello==>echo "hello" > t1/1.txt
 /projects/2/hello==>mkdir t2/t1
 /projects/2/hello==>mimic t1/1.txt t2/t1
