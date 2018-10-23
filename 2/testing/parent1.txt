@@ -1,6 +1,6 @@
 mkdir cleandir
 chdir cleandir
-mkdir t1 t2 t1/t1son t1/daughter t1/heir
+mkdir t1 t2 t1/t1son t1/t1daughter t1/t1heir
 echo golly > t1/t1son/t.txt
 echo gosh > t1/t1son/u.txt
 echo gee > t1/t1daughter/w
