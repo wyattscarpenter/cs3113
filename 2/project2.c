@@ -176,7 +176,7 @@ int mimic(const char * src, const char * dst, int recursive){
     ret = copy(src, srcindst);
   } else if (srcdir && pdstdir){
     if(recursive){
-      if( (ret = mkdir(dst, ALL_PERM)) ){
+      if( !(ret = mkdir(dst, ALL_PERM)) ){
 	do{
 	  char * nextsrc = slash(src,firstinsrc->d_name);
 	  char * nextdst = slash(dst,firstinsrc->d_name);
