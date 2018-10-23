@@ -34,7 +34,6 @@
 #define MAX_ARGS 64                // max # args
 #define SEPARATORS " \t\n"         // token sparators
 #define ALL_PERM 00777             // maximally permissive permissions
-//#define free(X)                    // define free to nothing to avoid segfaults
    
 extern char **environ;             // environment array
 
@@ -199,7 +198,7 @@ int mimic(const char * src, const char * dst, int recursive){
   }
 
   //free all those things from before
-  // free(bsrc);
+  free(bsrc);
   //free(ddst);
   //free(srcindst);
   
