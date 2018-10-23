@@ -29,6 +29,7 @@
 #include <dirent.h>
 #include <ftw.h>
 #include <libgen.h>
+#include <errno.h>
 
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
@@ -80,7 +81,7 @@ int eraser(char * target){
     } else {
       fprintf(stderr, "eraser on ent %s", name);
       ret |= eraser(slash(target, name));
-      free(tmptr);
+      //free(tmptr);
     }
   }
   ret |= erase(target);
@@ -106,7 +107,7 @@ int copy(char * src, char * dst){
     d = open(dst, O_CREAT | O_WRONLY | O_TRUNC, ALL_PERM);
     // ALL_PERM  means everyone has rw priveleges
     if(d==-1){
-      error("couldn't open destination file");
+      fprintf(stderr, "couldn't open destination file %s: %s\n", dst, strerror(errno));
       ret |= 2;
     } else {
       //we're all clear, ready to copy
