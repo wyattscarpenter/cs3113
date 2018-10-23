@@ -13,7 +13,6 @@ My approach was, on the whole, uninteresting, and exactly what you would expect:
 * entering the morph or mimic command calls parsemimic, which calls mimic (a recursive and confusing function), which can call itself or copy. morph will then call eraser, a recursive function which can call itself or erase.
 * use of the basename and dirname functions
 * use of opendir to tell if a path is a directory, and use of readdir to get the names of the files within
-* free(X) is defined by macro to be nothing, to avoid segfaults
 * use of a function I wrote named "fe" to fork and exec (also handles io redirection operators) when a foreign command is called. This uses execvp, because we already had a properly-formatted array of arguments handy.
 
 To Run
@@ -28,7 +27,6 @@ The README.txt is in its original location.
 filez and other internal commands will not be paired with redirects.
 The src location in morph and mimic may not be the current directory, parent directory, or a glob. In other terms, the following [src] locations are not acceptable: ., .., /, \*txt. If those such things are attempted, the program's behavior is undefined.
 Passing more than 60 targets to filez is undefined. In fact, passing more than one target to filez is undefined, but I'll let you do it up to 60.
-The program allocates some memory which it never frees, so we assume that your machine has enough memory to handle that.
 Error messages are not particularly important.
 If you want to exactly match the reference implimentation, various Ubuntu assumptions must be true, such as ls sort order (ls sort order was different on the Debian machine I developed on, and frightened me for a while).
 POSIX-compatible operating system.
