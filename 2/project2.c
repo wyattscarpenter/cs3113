@@ -159,8 +159,9 @@ int mimic(const char * src, const char * dst, int recursive){
   }
   if(srcdir && dstdir){
     if(recursive){
+      ret = mkdir(srcindst, ALL_PERM);
       do{
-	mimic(slash(src,firstinsrc->d_name),slash(dst,firstinsrc->d_name), recursive);
+	mimic(slash(src,firstinsrc->d_name),slash(srcindst,firstinsrc->d_name), recursive);
       }while( (firstinsrc = getent(srcdir)) );
     } else if (!firstinsrc) {
       ret = mkdir(srcindst, ALL_PERM);
