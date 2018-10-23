@@ -172,10 +172,12 @@ int mimic(const char * src, const char * dst, int recursive){
     ret = copy(src, srcindst);
   } else if (srcdir && pdstdir){
     if(recursive){
-      ret = mkdir(dst, ALL_PERM);
-      do{
-	mimic(slash(src,firstinsrc->d_name), slash(dst,firstinsrc->d_name), recursive);
-      }while( (firstinsrc = getent(srcdir)) );
+      if( (ret = mkdir(dst, ALL_PERM)) ){
+	mimic(src, dst, recursive);
+      } else{
+	error("couldn't mkdir in mimic");
+	return ret;
+      }
     } else if (!firstinsrc) {
       ret = mkdir(dst, ALL_PERM);
     } else {
