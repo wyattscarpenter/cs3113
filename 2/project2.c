@@ -50,7 +50,7 @@ struct dirent * getent(DIR * dirp){
   struct dirent * ent;
   do{
     ent = readdir(dirp);
-  }while(streq(ent->d_name,".") || streq(ent->d_name,".."));
+  }while( ent && (streq(ent->d_name,".") || streq(ent->d_name,"..")) );
   return ent;
 }
 
