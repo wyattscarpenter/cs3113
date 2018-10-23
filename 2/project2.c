@@ -27,16 +27,16 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <ftw.h>
 #include <libgen.h>
+#include <sys/stat.h> //for mkdir
 
-#define MAX_BUFFER 1024                        // max line buffer
-#define MAX_ARGS 64                            // max # args
-#define SEPARATORS " \t\n"                     // token sparators
-#define ALL_PERM 00777                         // maximally permissive permissions
-#define free(X)                                // define free to nothing to avoid segfaults
+#define MAX_BUFFER 1024            // max line buffer
+#define MAX_ARGS 64                // max # args
+#define SEPARATORS " \t\n"         // token sparators
+#define ALL_PERM 00777             // maximally permissive permissions
+//#define free(X)                    // define free to nothing to avoid segfaults
    
-extern char **environ;                         // environment array
+extern char **environ;             // environment array
 
 //some helper functions:
 int error(const char * msg){
@@ -56,8 +56,7 @@ struct dirent * getent(DIR * dirp){
 
 char * slash(const char * l, const char * r){ //this fn mallocs a string with the value l/r
   char * new = malloc(strlen(l)+strlen(r)+4); //4 seems like a good margin
-  new[0] = '\0'; // let's make new point to a null string
-  strcat(new,l);
+  strcpy(new,l);
   strcat(new,"/");
   strcat(new,r);
   return new;
@@ -149,7 +148,7 @@ int mimic(const char * src, const char * dst, int recursive){
   bsrc = basename(strcpy(bsrc,src));
   char * ddst = malloc(strlen(dst)+1); //the dir of the dst
   ddst = dirname(strcpy(ddst,dst));
-  DIR * pdstdir = opendir(ddst);            //test for existence of pdst
+  DIR * pdstdir = opendir(ddst);       //test for existence of pdst
   char * srcindst = slash(dst,bsrc);
   struct dirent * firstinsrc = NULL;
 
@@ -161,11 +160,11 @@ int mimic(const char * src, const char * dst, int recursive){
     if(recursive){
       ret = mkdir(srcindst, ALL_PERM);
       do{
-	char * tmp1;
-	char * tmp2;
-	mimic( (tmp1 = slash(src,firstinsrc->d_name)) , (tmp2 = slash(srcindst,firstinsrc->d_name)) , recursive);
-	free(tmp1);
-	free(tmp2);
+	char * nextsrc = slash(src,firstinsrc->d_name);
+	char * nextdst = slash(srcindst,firstinsrc->d_name);
+	mimic(nextsrc, nextdst, recursive);
+	free(nextsrc);
+	free(nextdst);
       }while( (firstinsrc = getent(srcdir)) );
     } else if (!firstinsrc) {
       ret = mkdir(srcindst, ALL_PERM);
@@ -179,11 +178,11 @@ int mimic(const char * src, const char * dst, int recursive){
     if(recursive){
       if( (ret = mkdir(dst, ALL_PERM)) ){
 	do{
-	  char * tmp1;
-	  char * tmp2;
-	  mimic( (tmp1 =slash(src,firstinsrc->d_name)) , (tmp2 = slash(dst,firstinsrc->d_name)) , recursive);
-	  free(tmp1);
-	  free(tmp2);
+	  char * nextsrc = slash(src,firstinsrc->d_name);
+	  char * nextdst = slash(dst,firstinsrc->d_name);
+	  mimic(nextsrc, nextdst, recursive);
+	  free(nextsrc);
+	  free(nextdst);
 	}while( (firstinsrc = getent(srcdir)) );
       } else {
 	error("couldn't mkdir in mimic");
@@ -421,11 +420,8 @@ int main (int argc, char ** argv)
 	    if(chdir(args[1])){
 	      fprintf(stderr, "Couldn't chdir to %s\n", args[1]);
 	    } else {
-	      //chdir worked, now set the pwd using str manipulation
-	      char * cmd = malloc(strlen("PWD=") + strlen(args[1]) + 1);
-	      strcpy(cmd,"PWD=");
-	      strcat(cmd,args[1]);
-	      putenv(cmd); //this string is part of the env now, don't modify.
+	      //chdir worked, now set the pwd using setenv
+	      setenv("PWD", args[1], 1); //will overwrite (hence the 1)
 	    }
 	  } else {
 	    //use system command to print working directory
@@ -439,7 +435,7 @@ int main (int argc, char ** argv)
 	if(chk("rmdirz")){ //"rmdirz" command
 	  if(args[1]){
 	    if(rmdir(args[1]) != 0){
-	      perror("couldn't rmdirz (dir must exist and be empty)");
+	      perror(args[1]);
 	    }
 	  } else {
 	    error("rmdirz requires one argument: target.");
