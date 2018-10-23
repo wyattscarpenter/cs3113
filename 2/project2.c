@@ -186,7 +186,7 @@ int mimic(const char * src, const char * dst, int recursive){
 	}while( (firstinsrc = getent(srcdir)) );
       } else {
 	error("couldn't mkdir in mimic");
-	perror("dst");
+	perror(dst);
 	return ret;
       }
     } else if (!firstinsrc) {
