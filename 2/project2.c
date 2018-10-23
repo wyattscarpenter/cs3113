@@ -199,9 +199,9 @@ int mimic(const char * src, const char * dst, int recursive){
   }
 
   //free all those things from before
-  free(bsrc);
-  free(ddst);
-  free(srcindst);
+  // free(bsrc);
+  //free(ddst);
+  //free(srcindst);
   
   return ret;
 }
