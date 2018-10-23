@@ -29,7 +29,6 @@
 #include <dirent.h>
 #include <ftw.h>
 #include <libgen.h>
-#include <errno.h>
 
 #define MAX_BUFFER 1024                        // max line buffer
 #define MAX_ARGS 64                            // max # args
@@ -76,15 +75,12 @@ int erase(const char * target){
 }
 
 int eraser(const char * target){
-  error("eraser:");
-  error(target);
   int ret = 0;
   DIR * dir = opendir(target);
   if (dir){ //erase within dir
     struct dirent * ent;
     while( (ent = getent(dir)) ){
       char * name = ent->d_name;
-	fprintf(stderr, "eraser on ent %s", name);
 	ret |= eraser(slash(target, name));
 	//free(tmptr);
     }
@@ -112,7 +108,7 @@ int copy(const char * src, const char * dst){
     d = open(dst, O_CREAT | O_WRONLY | O_TRUNC, ALL_PERM);
     // ALL_PERM  means everyone has rw priveleges
     if(d==-1){
-      fprintf(stderr, "couldn't open destination file %s: %s\n", dst, strerror(errno));
+      perror(dst);
       ret |= 2;
     } else {
       //we're all clear, ready to copy
@@ -426,7 +422,7 @@ int main (int argc, char ** argv)
 	if(chk("rmdirz")){ //"rmdirz" command
 	  if(args[1]){
 	    if(rmdir(args[1]) != 0){
-	      error("couldn't rmdirz. dir must exist and be empty.");
+	      perror("couldn't rmdirz (dir must exist and be empty)");
 	    }
 	  } else {
 	    error("rmdirz requires one argument: target.");
