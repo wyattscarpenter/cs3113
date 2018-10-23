@@ -1,0 +1,14 @@
+/projects/2==>mkdirz dirztest
+/projects/2==>chdir dirztest
+/projects/2/dirztest==>pwd
+/projects/2/dirztest
+/projects/2/dirztest==>filez
+/projects/2/dirztest==>mkdirz dirztest2
+/projects/2/dirztest==>filez
+dirztest2
+/projects/2/dirztest==>rmdirz dirztest2
+/projects/2/dirztest==>filez
+/projects/2/dirztest==>chdir ..
+/projects/2==>rmdirz dirztest2
+/projects/2==>rmdirz dirztest
+/projects/2==>
