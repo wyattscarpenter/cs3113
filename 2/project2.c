@@ -294,14 +294,13 @@ int fe(const char * command, char ** args){
 int main (int argc, char ** argv)
 {
   setbuf(stdout, NULL);
-  int isbatch = 0; //flag that indicates if we are in a batch script
-  //would be a bool that's not truly C style
+  int istty = 0;
   
   //if argument provided, read from it as a batchfile:
   if(argc>1){ //executable is of course the 1st arg
     freopen(argv[1],"r",stdin); //stdin is now reading from the file! yay!
-    isbatch = 1;
   }
+  istty = isatty(STDIN_FILENO); //if we are reading from a batchfile, naturally this will be 0
   char buf[MAX_BUFFER];                      // line buffer
   char * args[MAX_ARGS];                     // pointers to arg strings
   char ** arg;                               // working pointer thru args
@@ -314,7 +313,7 @@ int main (int argc, char ** argv)
 
   while (!feof(stdin)) {
     // get command line from input
-    if(!prevlineempty || !isbatch){
+    if(!prevlineempty || istty){
       printf("%s%s", getcwd(cwd, sizeof(cwd)), prompt);   // write enhanced prompt
     }
     prevlineempty=1;
@@ -330,7 +329,7 @@ int main (int argc, char ** argv)
  
       if (args[0]) {                     // if there's anything there
 	prevlineempty=0;
-	if(isbatch){ //print input if in batchfile, per spec
+	if(!istty){ //print input if in batchfile, per spec
 	  printf("%s",originalstr); //write command
 	} 
 
