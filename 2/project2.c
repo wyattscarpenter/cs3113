@@ -50,7 +50,7 @@ struct dirent * getent(DIR * dirp){
   do{
     ent = readdir(dirp);
   }while( ent && (streq(ent->d_name,".") || streq(ent->d_name,"..")) );
-  return ent; //liek readdir, returns NULL if error or we reach the end
+  return ent; //like readdir, returns NULL if error or we reach the end
 }
 
 char * slash(const char * l, const char * r){ //this fn mallocs a string with the value l/r
@@ -257,7 +257,6 @@ int fe(const char * command, char ** args){
   //args should almost always be called with the value args in the code below
   //args[0] is the name of the program, as is convention. 
   int pid;
-  int i = 0;
   switch( pid = fork() ){ 
   case -1:
     error("couldn't fork");
@@ -265,7 +264,7 @@ int fe(const char * command, char ** args){
   case 0:
     //child
     //freopen according to redirection operators
-    while( (args[++i]) ){
+    for(int i = 0; args[i]; i++){
       //each of these nulls out the operator entry
       //so execvp doesn't hit them when we actually run it
       if(!strcmp(args[i], "<")){
