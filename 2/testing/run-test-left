@@ -1,0 +1,5 @@
+#!/bin/bash
+base=$(basename "$1" .txt)
+(cd ..; ./project? < testing/"$1") > "$base".left.txt
+diff -b -B "$base".out.txt "$base".left.txt
+
