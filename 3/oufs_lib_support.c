@@ -90,9 +90,9 @@ int oufs_find_open_bit(unsigned char value){
   int acc = value;
   while(acc % 2 == 1){
     acc = acc /2;
-    i<<1;
+    i++;
   }
-  return i; // if it's full you get a 
+  return i; // if it's full you get an 8 I guess.
 }
 
 /**
