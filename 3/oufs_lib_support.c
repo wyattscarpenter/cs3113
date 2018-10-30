@@ -83,13 +83,13 @@ void oufs_clean_directory_block(INODE_REFERENCE self, INODE_REFERENCE parent, BL
   
 }
 
-//WROTE THIS FUNCTION BASED ON MY VAGUE HUNCHES
-//TODO: SEE IF THIS IS RIGHT
+//WROTE THIS FUNCTION BASED ON MY INFORMED GUESSES
+//IT'S PROBABLY RIGHT THO
 int oufs_find_open_bit(unsigned char value){
-  int i = 1;
+  int i = 0;
   int acc = value;
   while(acc % 2 == 1){
-    acc = acc /2;
+    acc = acc / 2;
     i++;
   }
   return i; // if it's full you get an 8 I guess.
