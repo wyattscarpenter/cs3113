@@ -1,0 +1,18 @@
+#/bin/bash
+
+# Set NEWDIR to the directory where your executables are
+# NEWDIR=.
+NEWDIR=/projects/3
+
+export PATH=$PATH:$NEWDIR
+
+zformat 
+echo "#######" 
+zmkdir foo
+zfilez
+echo "#######" 
+zinspect -master 
+echo "#######" 
+zinspect -inode 1
+echo "#######" 
+

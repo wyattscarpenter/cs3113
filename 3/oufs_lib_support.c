@@ -83,6 +83,18 @@ void oufs_clean_directory_block(INODE_REFERENCE self, INODE_REFERENCE parent, BL
   
 }
 
+//WROTE THIS FUNCTION BASED ON MY VAGUE HUNCHES
+//TODO: SEE IF THIS IS RIGHT
+int oufs_find_open_bit(unsigned char value){
+  int i = 1;
+  int acc = value;
+  while(acc % 2 == 1){
+    acc = acc /2;
+    i<<1;
+  }
+  return i; // if it's full you get a 
+}
+
 /**
  * Allocate a new data block
  *
@@ -141,4 +153,34 @@ BLOCK_REFERENCE oufs_allocate_new_block()
   
   // Done
   return(block_reference);
+}
+
+
+/**
+ *  Given an inode reference, read the inode from the virtual disk.
+ *
+ *  @param i Inode reference (index into the inode list)
+ *  @param inode Pointer to an inode memory structure.  This structure will be
+ *                filled in before return)
+ *  @return 0 = successfully loaded the inode
+ *         -1 = an error has occurred
+ *
+ */
+int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
+{
+  if(debug)
+    fprintf(stderr, "Fetching inode %d\n", i);
+
+  // Find the address of the inode block and the inode within the block
+  BLOCK_REFERENCE block = i / INODES_PER_BLOCK + 1;
+  int element = (i % INODES_PER_BLOCK);
+
+  BLOCK b;
+  if(vdisk_read_block(block, &b) == 0) {
+    // Successfully loaded the block: copy just this inode
+    *inode = b.inodes.inode[element];
+    return(0);
+  }
+  // Error case
+  return(-1);
 }
