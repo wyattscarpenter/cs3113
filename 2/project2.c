@@ -268,14 +268,29 @@ int fe(const char * command, char ** args){
       //each of these nulls out the operator entry
       //so execvp doesn't hit them when we actually run it
       if(!strcmp(args[i], "<")){
-	freopen(args[i+1], "r", stdin);
-	args[i] = NULL;
+	if(args[i+1]){
+	  freopen(args[i+1], "r", stdin);
+	  args[i] = NULL;
+	} else {
+	  error("infix redirection operator encountered at end of command, aborting");
+	  exit(EXIT_FAILURE);
+	}
       }else if(!strcmp(args[i], ">")){
-	freopen(args[i+1], "w", stdout);	
-	args[i] = NULL;
+        if(args[i+1]){
+          freopen(args[i+1], "w", stdout);
+          args[i] = NULL;
+        } else {
+          error("infix redirection operator encountered at end of command, aborting");
+          exit(EXIT_FAILURE);
+        }
       }else if(!strcmp(args[i], ">>")){
-	freopen(args[i+1], "a", stdout);
-	args[i] = NULL;
+        if(args[i+1]){
+          freopen(args[i+1], "a", stdout);
+          args[i] = NULL;
+        } else {
+          error("infix redirection operator encountered at end of command, aborting");
+          exit(EXIT_FAILURE);
+        }
       }
     }
     execvp(command, args); 
