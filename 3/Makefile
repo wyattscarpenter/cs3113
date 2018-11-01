@@ -1,7 +1,7 @@
 #This reusable make file was written by Wyatt S Carpenter
 INCLUDES = oufs.h oufs_lib.h vdisk.h
 LIB = oufs_lib.o vdisk.o
-EXES = zinspect
+EXES = zinspect zformat
 
 all: $(EXES)
 
@@ -10,6 +10,10 @@ clean:
 
 zinspect: zinspect.o $(LIB)
 	cc -o zinspect zinspect.o $(LIB)
+
+zformat: zformat.o $(LIB)
+	cc -o zformat zformat.o $(LIB)
+
 
 #cool rule for object files from dr fagg
 .c.o: $(INCLUDES)
