@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 
   if(argc == 2){
     if(strncmp(argv[1], "-master", 8) == 0) {
-      /*// Master record
+      // Master record
       BLOCK block;
       if(vdisk_read_block(0, &block) != 0) {
 	fprintf(stderr, "Error reading master block\n");
@@ -25,8 +25,7 @@ int main(int argc, char** argv) {
 	  printf("%02x\n", block.master.block_allocated_flag[i]);
 	}
       }
-      */
-      puts("Inode table:\n01\n00\n00\n00\n00\n00\n00\nBlock table:\nff\n03\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00");
+      
     }else{
       fprintf(stderr, "Unknown argument (%s)\n", argv[1]);
     }
