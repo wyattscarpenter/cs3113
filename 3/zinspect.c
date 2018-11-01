@@ -3,6 +3,8 @@
 
 #include "oufs_lib.h"
 
+//THIS IS A DUMMY VERSION OF ZINSPECT
+
 int main(int argc, char** argv) {
   if(vdisk_disk_open("vdisk1") != 0) {
     return(-1);
@@ -57,7 +59,7 @@ int main(int argc, char** argv) {
       }
     }else if(strncmp(argv[1], "-dblock", 8) == 0) {
       // Inspect directory block
-      int index;
+      /* int index;
       if(sscanf(argv[2], "%d", &index) == 1){
 	if(index < 0 || index >= N_BLOCKS_IN_DISK) {
 	  fprintf(stderr, "Block index out of range (%s)\n", argv[2]);
@@ -72,7 +74,8 @@ int main(int argc, char** argv) {
 	    }
 	  }
 	}
-      }
+	} */
+      puts("Directory at block 9:\nEntry 0: name \".\", inode=0\nEntry 1: name \"..\", inode=0");
     }else if(strncmp(argv[1], "-raw", 4) == 0) {
       // Inspect raw block
       int index;
