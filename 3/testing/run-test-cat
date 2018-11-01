@@ -1,4 +1,0 @@
-#!/bin/bash
-base=$(basename "$1" .txt)
-(cd ..; cat testing/"$1" | ./project?) > "$base".cat.txt
-diff -b -B "$base".out.txt "$base".cat.txt

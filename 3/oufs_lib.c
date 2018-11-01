@@ -232,6 +232,7 @@ int oufs_format_disk(char * virtual_disk_name){
 
     DIRECTORY_BLOCK db;
     for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
+      //not sure what the name field should be for empty ent, probably empty str
       strncpy(db.entry[i].name, "", FILE_NAME_SIZE);
       db.entry[i].inode_reference = UNALLOCATED_INODE;
     }

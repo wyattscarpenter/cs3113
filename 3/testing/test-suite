@@ -1,5 +1,3 @@
 for i in $( find .  -name "*.txt" -not -name "*.*.txt" ); do
     echo $i: $(./run-test $i && echo PASS || echo FAIL)
-    echo $i\| $(./run-test-cat $i && echo PASS || echo FAIL)
-    echo $i\< $(./run-test-left $i && echo PASS || echo FAIL)
 done
