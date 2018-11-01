@@ -187,10 +187,13 @@ int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
 
 int oufs_format_disk(char * virtual_disk_name){
   if (!vdisk_disk_open(virtual_disk_name)) {
-    for(int i = 0; i < N_BLOCKS_IN_DISK; i++){
-      //DO SOMETHING
+    //zero all blocks
+    BLOCK z;
+    memset(&z, 0, sizeof(BLOCK));
+    for(BLOCK_REFERENCE i = 0; i < N_BLOCKS_IN_DISK; i++){
+      vdisk_write_block(i,&z);
     }
   } else {
-    
+    perror("oufs_format_disk couldn't open vdisk with provided name");
   }
 }
