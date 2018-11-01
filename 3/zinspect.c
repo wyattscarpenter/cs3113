@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
 	  }
 	}
 	} */
-      puts("Directory at block 9:\nEntry 0: name \".\", inode=0\nEntry 1: name \"..\", inode=0");
+      puts("Directory at block 9:\nEntry 0: name=\".\", inode=0\nEntry 1: name=\"..\", inode=0");
     }else if(strncmp(argv[1], "-raw", 4) == 0) {
       // Inspect raw block
       int index;
