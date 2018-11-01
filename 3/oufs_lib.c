@@ -193,6 +193,53 @@ int oufs_format_disk(char * virtual_disk_name){
     for(BLOCK_REFERENCE i = 0; i < N_BLOCKS_IN_DISK; i++){
       vdisk_write_block(i,&z);
     }
+    //actually do the thing
+
+    //TODO: if I have to use this logic again, make fns to initialize
+    //these structs and refactor the code that way
+    
+    //1. write the master block
+    MASTER_BLOCK m;
+    memset(&m, 0, sizeof(m));
+    //I happen to know these magic constants are true:
+    m.block_allocated_flag[0] = 0xFF; // master block and 7 inode blocks
+    m.block_allocated_flag[1] = 0x03; // 8th inode block and first data block
+    m.inode_allocated_flag[0] = 0x01; // first inode (root)
+    vdisk_write_block(MASTER_BLOCK_REFERENCE,&z);
+
+    //2. write the first inode block, containing the first inode
+    INODE root;
+    root.type = IT_DIRECTORY;
+    root.n_references = 1;
+    root.data[0] = ROOT_DIRECTORY_BLOCK;
+    for(int i = 1; i < BLOCKS_PER_INODE; i++){
+      root.data[i] = UNALLOCATED_BLOCK;
+    }
+    root.size = 2;
+
+    INODE_BLOCK ib; // I'm just gonna leave this as mostly garbage
+    ib.inode[0] = root;
+    vdisk_write_block(1,&ib); //1 is the first inode block
+
+    //3. write the dir block representing /
+    DIRECTORY_ENTRY rootself;
+    strncpy(rootself.name, ".", FILE_NAME_SIZE);
+    rootself.inode_reference = 0;
+    DIRECTORY_ENTRY rootrent;
+    strncpy(rootrent.name, "..", FILE_NAME_SIZE);
+    rootrent.inode_reference = 0;
+    
+
+    DIRECTORY_BLOCK db;
+    for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
+      strncpy(db.entry[i].name, "", FILE_NAME_SIZE);
+      db.entry[i].inode_reference = UNALLOCATED_INODE;
+    }
+    db.entry[0] = rootself;
+    db.entry[1] = rootrent;
+    vdisk_write_block(ROOT_DIRECTORY_BLOCK,&db);
+
+    vdisk_disk_close(virtual_disk_name);
   } else {
     perror("oufs_format_disk couldn't open vdisk with provided name");
   }
