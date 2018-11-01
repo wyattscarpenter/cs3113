@@ -205,7 +205,7 @@ int oufs_format_disk(char * virtual_disk_name){
     m.block_allocated_flag[0] = 0xFF; // master block and 7 inode blocks
     m.block_allocated_flag[1] = 0x03; // 8th inode block and first data block
     m.inode_allocated_flag[0] = 0x01; // first inode (root)
-    vdisk_write_block(MASTER_BLOCK_REFERENCE,&z);
+    vdisk_write_block(MASTER_BLOCK_REFERENCE,&m);
 
     //2. write the first inode block, containing the first inode
     INODE root;
