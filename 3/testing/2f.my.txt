@@ -45,6 +45,6 @@ Block 14: 65535
 Size: 2
 #######
 Directory at block 9:
-Entry 0: name ".", inode=0
-Entry 1: name "..", inode=0
+Entry 0: name=".", inode=0
+Entry 1: name="..", inode=0
 #######
