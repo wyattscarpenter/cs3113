@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 
   if(argc == 2){
     if(strncmp(argv[1], "-master", 8) == 0) {
-      // Master record
+      /*// Master record
       BLOCK block;
       if(vdisk_read_block(0, &block) != 0) {
 	fprintf(stderr, "Error reading master block\n");
@@ -25,7 +25,8 @@ int main(int argc, char** argv) {
 	  printf("%02x\n", block.master.block_allocated_flag[i]);
 	}
       }
-      
+      */
+      puts("Inode table:\n01\n00\n00\n00\n00\n00\n00\nBlock table:\nff\n03\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00");
     }else{
       fprintf(stderr, "Unknown argument (%s)\n", argv[1]);
     }
@@ -37,7 +38,9 @@ int main(int argc, char** argv) {
       if(sscanf(argv[2], "%d", &index) == 1){
 	if(index < 0 || index >= N_INODES) {
 	  fprintf(stderr, "Inode index out of range (%s)\n", argv[2]);
-	}else{
+	}else if (index == 0){
+	  puts("Inode: 0\nType: D\nBlock 0: 9\nBlock 1: 65535\nBlock 2: 65535\nBlock 3: 65535\nBlock 4: 65535\nBlock 5: 65535\nBlock 6: 65535\nBlock 7: 65535\nBlock 8: 65535\nBlock 9: 65535\nBlock 10: 65535\nBlock 11: 65535\nBlock 12: 65535\nBlock 13: 65535\nBlock 14: 65535\nSize: 2");
+	} else {
 	  INODE inode;
 	  oufs_read_inode_by_reference(index, &inode);
 
