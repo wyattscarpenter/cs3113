@@ -185,8 +185,8 @@ int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
   return(-1);
 }
 
-int oufs_format_disk(const char * virtual_disk_name){
-  if (!vdisk_disk_open(disk_name)) {
+int oufs_format_disk(char * virtual_disk_name){
+  if (!vdisk_disk_open(virtual_disk_name)) {
     for(int i = 0; i < N_BLOCKS_IN_DISK; i++){
       //DO SOMETHING
     }
