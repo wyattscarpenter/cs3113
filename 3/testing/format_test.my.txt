@@ -1,6 +1,6 @@
 #######
 Inode table:
-01
+00
 00
 00
 00
@@ -8,8 +8,8 @@ Inode table:
 00
 00
 Block table:
-ff
-03
+00
+00
 00
 00
 00

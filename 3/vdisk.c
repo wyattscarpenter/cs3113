@@ -7,7 +7,7 @@
  */
 
 // Debug flag
-#define debug 0
+#define debug 1
 
 // File descriptor for virtual disk.  Private to this file
 // Yes, global variables are generally a bad idea...
@@ -26,7 +26,7 @@ int vdisk_disk_open(char *virtual_disk_name)
   if(vdisk_fd != 0) {
     fprintf(stderr, "A disk is already opened\n");
     return(-1);
-  };
+  }
 
   // Open file
   int fd = open(virtual_disk_name, O_RDWR | O_CREAT,
@@ -36,12 +36,12 @@ int vdisk_disk_open(char *virtual_disk_name)
   if(fd <= 0) {
     fprintf(stderr, "Unable to open virtual disk (%s)\n", virtual_disk_name);
     return(-1);
-  };
+  }
 
   // Remember the fd in the global variable
   vdisk_fd = fd;
   return(0);
-};
+}
 
 /**
  * Close the virtual disk
@@ -54,7 +54,7 @@ int vdisk_disk_close()
   if(vdisk_fd == 0) {
     fprintf(stderr, "vdisk_disk_close(): disk not initialized\n");
     exit(-1);
-  };
+  }
 
   // Close the file
   close(vdisk_fd);
@@ -81,7 +81,7 @@ int vdisk_read_block(BLOCK_REFERENCE block_ref, void *block)
   if(vdisk_fd == 0) {
     fprintf(stderr, "vdisk_read_block(): disk not initialized\n");
     exit(-1);
-  };
+  }
 
   // Make sure that we have a valid block request
   if(block_ref >= N_BLOCKS_IN_DISK) {
@@ -121,7 +121,7 @@ int vdisk_write_block(BLOCK_REFERENCE block_ref, void *block)
   if(vdisk_fd == 0) {
     fprintf(stderr, "vdisk_write_block(): disk not initialized\n");
     exit(-1);
-  };
+  }
 
   // Is it a valid block request?
   if(block_ref >= N_BLOCKS_IN_DISK) {

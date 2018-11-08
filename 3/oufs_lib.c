@@ -1,7 +1,15 @@
 #include <stdlib.h>
 #include "oufs_lib.h"
 
-#define debug 0
+#define debug 1
+
+//from wyatt's idiosyncracies
+typedef unsigned char byte;
+
+int streq(const char * l, const char * r){ //check if strings equal
+  return !strcmp(l,r); //returns true if equal, false if not equal
+}
+
 
 /**
  * Read the ZPWD and ZDISK environment variables & copy their values into cwd and disk_name.
@@ -166,6 +174,17 @@ BLOCK_REFERENCE oufs_allocate_new_block()
  *         -1 = an error has occurred
  *
  */
+
+BLOCK_REFERENCE ir2br(INODE_REFERENCE i){
+  //returns block reference given inode reference
+  return i / INODES_PER_BLOCK + 1;
+}
+
+int ir2ei(INODE_REFERENCE i){
+  //returns element reference given inode reference
+  return i % INODES_PER_BLOCK;
+}
+
 int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
 {
   if(debug)
@@ -185,8 +204,24 @@ int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
   return(-1);
 }
 
+int oufs_write_inode_by_reference(INODE_REFERENCE i, INODE *inode){
+  BLOCK b;
+  int element = (i % INODES_PER_BLOCK);
+  if(vdisk_read_block(ir2br(i), &b) == 0) {
+    // Successfully loaded the block: copy just this inode
+    b.inodes.inode[element] = *inode;
+    if(vdisk_write_block(ir2br(i), &b) != 0){
+      return EXIT_SUCCESS;
+    }
+  }
+  // Error case
+  return EXIT_FAILURE;
+}
+
+
 int oufs_format_disk(char * virtual_disk_name){
   if (!vdisk_disk_open(virtual_disk_name)) {
+    
     //zero all blocks
     BLOCK z;
     memset(&z, 0, sizeof(BLOCK));
@@ -199,14 +234,13 @@ int oufs_format_disk(char * virtual_disk_name){
     //these structs and refactor the code that way
     
     //1. write the master block
-    MASTER_BLOCK m;
-    memset(&m, 0, sizeof(m));
+    BLOCK m = z;
     //I happen to know these magic constants are true:
-    m.block_allocated_flag[0] = 0xFF; // master block and 7 inode blocks
-    m.block_allocated_flag[1] = 0x03; // 8th inode block and first data block
-    m.inode_allocated_flag[0] = 0x01; // first inode (root)
+    m.master.block_allocated_flag[0] = 0xFF; // master block and 7 inode blocks
+    m.master.block_allocated_flag[1] = 0x03; // 8th inode block and first data block
+    m.master.inode_allocated_flag[0] = 0x01; // first inode (root)
     vdisk_write_block(MASTER_BLOCK_REFERENCE,&m);
-
+    
     //2. write the first inode block, containing the first inode
     INODE root;
     root.type = IT_DIRECTORY;
@@ -217,8 +251,8 @@ int oufs_format_disk(char * virtual_disk_name){
     }
     root.size = 2;
 
-    INODE_BLOCK ib; // I'm just gonna leave this as mostly garbage
-    ib.inode[0] = root;
+    BLOCK ib; // I'm just gonna leave this as mostly garbage
+    ib.inodes.inode[0] = root;
     vdisk_write_block(1,&ib); //1 is the first inode block
 
     //3. write the dir block representing /
@@ -239,9 +273,78 @@ int oufs_format_disk(char * virtual_disk_name){
     db.entry[0] = rootself;
     db.entry[1] = rootrent;
     vdisk_write_block(ROOT_DIRECTORY_BLOCK,&db);
-
+    
     vdisk_disk_close(virtual_disk_name);
+    return EXIT_SUCCESS;
   } else {
     perror("oufs_format_disk couldn't open vdisk with provided name");
+    return EXIT_FAILURE;
   }
 }
+
+int oufs_mkdir(char *cwd, char *path){
+  return EXIT_FAILURE;
+}
+
+int oufs_find_file(char *cwd, char * path, INODE_REFERENCE *parent, INODE_REFERENCE *child, char *local_name);
+
+int print_dir(BLOCK_REFERENCE dir){
+  char *names[DIRECTORY_ENTRIES_PER_BLOCK]; //array of char pointers
+  
+  int i = 0;
+  BLOCK b;
+  if(vdisk_read_block(dir, &b) == 0) {
+    // Successfully loaded the block:
+    while((i < DIRECTORY_ENTRIES_PER_BLOCK) && (names[i] = b.directory.entry[i].name)){
+      i++;
+    }
+    qsort(&names, sizeof(names), sizeof(names[0]), (int (*)(const void *, const void *))&strcmp);
+    //note that strcmp takes char *s not void *s so we had to cast it...
+    //I have the hunch that __compar_fn_t is specific to gcc, so that type is probably not portable.
+    //so we use the ugly (int (*)(const void *, const void *))
+    for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
+      if(names[i]){
+	printf("%s%s\n",names[i],"/"); //TODO: actually intelligently detect dirs
+	//(currently hard-codes dir assumption)
+      }
+    }
+  }
+  //ERROR CASE
+  return EXIT_FAILURE;
+}
+
+BLOCK_REFERENCE dirpdir(BLOCK_REFERENCE br, const char * name){
+  //Progress from DIRectory block to DIRectory block
+  BLOCK b;
+  if(vdisk_read_block(br, &b) == 0) {
+    // Successfully loaded the block:
+    for(int i; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
+      if (streq(b.directory.entry[i].name, name)){
+	INODE inode;
+	oufs_read_inode_by_reference(b.directory.entry[i].inode_reference, &inode);
+	return inode.data[0];
+      }
+    }
+  }
+  //ERROR CASE
+  return UNALLOCATED_BLOCK;
+}
+int oufs_list(char *cwd, char *path){
+  if(!path){
+    puts(cwd);
+  } else {
+    BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
+    char * name;
+    while( (name = strtok(cwd, "/")) ){
+      br = dirpdir(br, name);
+      cwd = NULL; //this allows strtok to process the same array next time
+    }
+    while( (name = strtok(path, "/")) ){
+      br = dirpdir(br, name);
+      path = NULL; //this allows strtok to process the same array next time
+    }
+    print_dir(br);
+  }
+  return EXIT_SUCCESS;
+}
+int oufs_rmdir(char *cwd, char *path){return EXIT_FAILURE;}
