@@ -1,14 +1,8 @@
 #include <stdlib.h>
 #include "oufs_lib.h"
+#include "widio.c"
 
 #define debug 1
-
-//from wyatt's idiosyncracies
-typedef unsigned char byte;
-
-int streq(const char * l, const char * r){ //check if strings equal
-  return !strcmp(l,r); //returns true if equal, false if not equal
-}
 
 
 /**
@@ -302,6 +296,8 @@ int print_dir(BLOCK_REFERENCE dir){
     //note that strcmp takes char *s not void *s so we had to cast it...
     //I have the hunch that __compar_fn_t is specific to gcc, so that type is probably not portable.
     //so we use the ugly (int (*)(const void *, const void *))
+    //actually I only need to cast here because I want to avoid a warning from gcc's -Wall option;
+    //it would work in any case, probably
     for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
       if(names[i]){
 	printf("%s%s\n",names[i],"/"); //TODO: actually intelligently detect dirs
@@ -335,9 +331,11 @@ int oufs_list(char *cwd, char *path){
   } else {
     BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
     char * name;
-    while( (name = strtok(cwd, "/")) ){
-      br = dirpdir(br, name);
-      cwd = NULL; //this allows strtok to process the same array next time
+    if(path[0] != '/'){
+      while( (name = strtok(cwd, "/")) ){
+	br = dirpdir(br, name);
+	cwd = NULL; //this allows strtok to process the same array next time
+      }
     }
     while( (name = strtok(path, "/")) ){
       br = dirpdir(br, name);
