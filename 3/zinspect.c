@@ -3,16 +3,19 @@
 
 #include "oufs_lib.h"
 
-//THIS IS A DUMMY VERSION OF ZINSPECT
-
 int main(int argc, char** argv) {
-  if(vdisk_disk_open("vdisk1") != 0) {
+  // Get the key environment variables
+  char cwd[MAX_PATH_LENGTH];
+  char disk_name[MAX_PATH_LENGTH];
+  oufs_get_environment(cwd, disk_name);
+
+  if(vdisk_disk_open(disk_name) != 0) {
     return(-1);
   }
 
   if(argc == 2){
     if(strncmp(argv[1], "-master", 8) == 0) {
-      /*// Master record
+      // Master record
       BLOCK block;
       if(vdisk_read_block(0, &block) != 0) {
 	fprintf(stderr, "Error reading master block\n");
@@ -27,8 +30,7 @@ int main(int argc, char** argv) {
 	  printf("%02x\n", block.master.block_allocated_flag[i]);
 	}
       }
-      */
-      puts("Inode table:\n01\n00\n00\n00\n00\n00\n00\nBlock table:\nff\n03\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00\n00");
+      
     }else{
       fprintf(stderr, "Unknown argument (%s)\n", argv[1]);
     }
@@ -40,9 +42,7 @@ int main(int argc, char** argv) {
       if(sscanf(argv[2], "%d", &index) == 1){
 	if(index < 0 || index >= N_INODES) {
 	  fprintf(stderr, "Inode index out of range (%s)\n", argv[2]);
-	}else if (index == 0){
-	  puts("Inode: 0\nType: D\nBlock 0: 9\nBlock 1: 65535\nBlock 2: 65535\nBlock 3: 65535\nBlock 4: 65535\nBlock 5: 65535\nBlock 6: 65535\nBlock 7: 65535\nBlock 8: 65535\nBlock 9: 65535\nBlock 10: 65535\nBlock 11: 65535\nBlock 12: 65535\nBlock 13: 65535\nBlock 14: 65535\nSize: 2");
-	} else {
+	}else{
 	  INODE inode;
 	  oufs_read_inode_by_reference(index, &inode);
 
@@ -57,9 +57,31 @@ int main(int argc, char** argv) {
       }else{
 	fprintf(stderr, "Unknown argument (-inode %s)\n", argv[2]);
       }
+    }else if(strncmp(argv[1], "-inodee", 8) == 0) {
+      // Extended Inode query
+      int index;
+      if(sscanf(argv[2], "%d", &index) == 1){
+	if(index < 0 || index >= N_INODES) {
+	  fprintf(stderr, "Inode index out of range (%s)\n", argv[2]);
+	}else{
+	  INODE inode;
+	  oufs_read_inode_by_reference(index, &inode);
+
+	  printf("Inode: %d\n", index);
+	  printf("Type: %c\n", inode.type);
+	  printf("N references: %d\n", inode.n_references);
+	  for(int i = 0; i < BLOCKS_PER_INODE; ++i) {
+	    printf("Block %d: %d\n", i, inode.data[i]);
+	  }
+	  printf("Size: %d\n", inode.size);
+	  
+	}
+      }else{
+	fprintf(stderr, "Unknown argument (-inode %s)\n", argv[2]);
+      }
     }else if(strncmp(argv[1], "-dblock", 8) == 0) {
       // Inspect directory block
-      /* int index;
+      int index;
       if(sscanf(argv[2], "%d", &index) == 1){
 	if(index < 0 || index >= N_BLOCKS_IN_DISK) {
 	  fprintf(stderr, "Block index out of range (%s)\n", argv[2]);
@@ -74,8 +96,7 @@ int main(int argc, char** argv) {
 	    }
 	  }
 	}
-	} */
-      puts("Directory at block 9:\nEntry 0: name=\".\", inode=0\nEntry 1: name=\"..\", inode=0");
+      }
     }else if(strncmp(argv[1], "-raw", 4) == 0) {
       // Inspect raw block
       int index;
