@@ -25,6 +25,17 @@ INODE new_inode(char inode_type, BLOCK_REFERENCE br){
   return new;
 }
 
+void rm_from_block(const char * name, BLOCK* db){
+  int i = 0;
+  while(db->directory.entry[i].inode_reference != UNALLOCATED_INODE){
+    i++;
+    if(streq(db->directory.entry[i].name, name)){
+      db->directory.entry[i].name[0] = '\0';
+      db->directory.entry[i].inode_reference = UNALLOCATED_INODE;
+    }
+  }
+}
+
 int is_full(BLOCK_REFERENCE dbr){ //true if full false otherwise
   int i = 0;
   BLOCK b;
@@ -33,6 +44,20 @@ int is_full(BLOCK_REFERENCE dbr){ //true if full false otherwise
     i++;
   }
   if(i>=DIRECTORY_ENTRIES_PER_BLOCK){
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+int is_empty(BLOCK_REFERENCE dbr){ //true if empty false otherwise
+  int i = 0;
+  BLOCK b;
+  vdisk_read_block(dbr, &b);
+  while(b.directory.entry[i].inode_reference != UNALLOCATED_INODE){
+    i++;
+  }
+  if(i==2){
     return 1;
   } else {
     return 0;
@@ -467,4 +492,28 @@ int oufs_mkdir(const char *cwd, const char *path){
   return EXIT_SUCCESS;
 }
 
-int oufs_rmdir(const char *cwd, const char *path){return EXIT_FAILURE;}
+int oufs_rmdir(const char *cwd, const char *path){
+    //remember, cwd will be / by default, and path will be an empty string by default.
+  BLOCK_REFERENCE br;
+  BLOCK_REFERENCE pbr;
+  char name[FILE_NAME_SIZE];
+  oufs_find_file(cwd, path, &pbr, &br, name);
+  if(br == UNALLOCATED_BLOCK){
+    fprintf(stderr,"path doesn't exist");
+    return EXIT_FAILURE;    
+  }
+ 
+  //check if lastb is full. a bit awkward because we don't want to actually do any operations yet
+  if(is_empty(pbr)){
+    fprintf(stderr,"dir nonempty");
+    return EXIT_FAILURE;    
+  }
+  //everything valid, so now we have to perform the operations
+  BLOCK b;
+  BLOCK lastb;
+  vdisk_read_block(pbr, &lastb);
+  rm_from_block(name, &lastb);
+  vdisk_write_block(pbr, &lastb);
+  //DIDN'T GET TO THE LAST BIT
+  return EXIT_SUCCESS;
+}
