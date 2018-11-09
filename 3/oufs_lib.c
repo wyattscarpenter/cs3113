@@ -4,6 +4,13 @@
 
 #define debug 1
 
+int string_compare(const void* l, const void* r){
+  //a wrapper function to use strcmp with qsort
+  //basically each void * is going to be point at our char *,
+  //so we jump through the appropriate hoops
+  return strcmp(*(char**)l,*(char**)r);
+}
+
 INODE new_inode(BLOCK_REFERENCE br){
   //NOTE THAT ATM THIS ONLY CONSTRUCTS DIRECTORY INODES
   INODE new;
@@ -340,7 +347,7 @@ int print_dir(BLOCK_REFERENCE dir){
       }
     }
     if(debug){fprintf(stderr, "##time to sort. array size %d\n", i);}
-    qsort(&names, i, sizeof(names[0]), (int (*)(const void *, const void *))&strcmp);
+    qsort(&names, i, sizeof(names[0]), &string_compare);
     //note that strcmp takes char *s not void *s so we had to cast it...
     //I have the hunch that __compar_fn_t is specific to gcc, so that type is probably not portable.
     //so we use the ugly (int (*)(const void *, const void *))
