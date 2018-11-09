@@ -4,6 +4,50 @@
 
 #define debug 1
 
+INODE new_inode(BLOCK_REFERENCE br){
+  //NOTE THAT ATM THIS ONLY CONSTRUCTS DIRECTORY INODES
+  INODE new;
+  new.type = IT_DIRECTORY;
+  new.n_references = 1;
+  new.data[0] = br;
+  for(int i = 1; i < BLOCKS_PER_INODE; i++){
+    new.data[i] = UNALLOCATED_BLOCK;
+  }
+  new.size = 2;
+  return new;
+}
+
+int add_inode_to_block(BLOCK *b, INODE_REFERENCE ir, const char * name){
+  int i = 0;
+  while(b->directory.entry[i++].inode_reference != UNALLOCATED_INODE);
+  if(i>=DIRECTORY_ENTRIES_PER_BLOCK){
+    perror("no more open inode entries");
+    return -1;
+  } else {
+    b->directory.entry[i].inode_reference = ir;
+    strcpy(b->directory.entry[i].name, name);
+    return 0;
+  }
+}
+
+INODE_REFERENCE oufs_allocate_new_inode(BLOCK_REFERENCE br){
+  BLOCK block;
+  // Read the inode blocks
+  for(int i = 1; i < N_INODE_BLOCKS + 1; i++){
+    vdisk_read_block(i, &block);//first inode block
+    for(int j = 0; j < INODES_PER_BLOCK; j++){
+      if(block.inodes.inode[j].type==IT_NONE){//I think this will be set to zero by coincedence.
+	block.inodes.inode[j] = new_inode(br);
+	return ((i-1)<<3) + j;
+      }
+    }
+  }
+  if(debug){
+    fprintf(stderr, "No open inodes\n");
+  }
+  return(UNALLOCATED_INODE);
+}
+
 /**
  * Read the ZPWD and ZDISK environment variables & copy their values into cwd and disk_name.
  * If these environment variables are not set, then reasonable defaults are given.
@@ -156,6 +200,16 @@ BLOCK_REFERENCE oufs_allocate_new_block()
   return(block_reference);
 }
 
+BLOCK_REFERENCE ir2br(INODE_REFERENCE i){
+  //returns block reference given inode reference
+  return i / INODES_PER_BLOCK + 1;
+}
+
+int ir2ei(INODE_REFERENCE i){
+  //returns element reference given inode reference
+  return i % INODES_PER_BLOCK;
+}
+
 
 /**
  *  Given an inode reference, read the inode from the virtual disk.
@@ -167,17 +221,6 @@ BLOCK_REFERENCE oufs_allocate_new_block()
  *         -1 = an error has occurred
  *
  */
-
-BLOCK_REFERENCE ir2br(INODE_REFERENCE i){
-  //returns block reference given inode reference
-  return i / INODES_PER_BLOCK + 1;
-}
-
-int ir2ei(INODE_REFERENCE i){
-  //returns element reference given inode reference
-  return i % INODES_PER_BLOCK;
-}
-
 int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
 {
   if(debug)
@@ -210,7 +253,6 @@ int oufs_write_inode_by_reference(INODE_REFERENCE i, INODE *inode){
   // Error case
   return EXIT_FAILURE;
 }
-
 
 int oufs_format_disk(char * virtual_disk_name){
   if (!vdisk_disk_open(virtual_disk_name)) {
@@ -275,10 +317,6 @@ int oufs_format_disk(char * virtual_disk_name){
   }
 }
 
-int oufs_mkdir(const char *cwd, const char *path){
-  return EXIT_FAILURE;
-}
-
 int oufs_find_file(char *cwd, char *path, INODE_REFERENCE *parent, INODE_REFERENCE *child, char *local_name);
 
 int print_dir(BLOCK_REFERENCE dir){
@@ -340,7 +378,7 @@ BLOCK_REFERENCE dirpdir(BLOCK_REFERENCE br, const char * name){
 int oufs_list(const char *cwd, const char *path){
   //remember, cwd will be / by default, and path will be an empty string by default.
   BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
-  char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! considr yourself lucky.
+  char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
   char * name;
   if(path[0] == '/'){ //path is absolute
     strcpy(fullpath,path);
@@ -358,4 +396,48 @@ int oufs_list(const char *cwd, const char *path){
   print_dir(br);
   return EXIT_SUCCESS;
 }
+
+int oufs_mkdir(const char *cwd, const char *path){
+   //remember, cwd will be / by default, and path will be an empty string by default.
+  BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
+  char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
+  char * name;
+  char * lastname;
+  if(path[0] == '/'){ //path is absolute
+    strcpy(fullpath,path);
+  } else { //path is relative to cwd
+    strcpy(fullpath,cwd);
+    strcat(fullpath,"/"); // extra slash is fine, no slash would be a bug
+    strcat(fullpath,path);
+  }
+  char * p = fullpath;
+  BLOCK_REFERENCE lastbr = br;
+  while( (name = strtok(p, "/")) ){
+    if(debug){fprintf(stderr, "##processing this part of path: %s\n", name);}
+    lastbr=br;
+    lastname=name;
+    br = dirpdir(br, name);
+    if(lastbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
+      perror("a parent directory in the path did not exist");
+      return EXIT_FAILURE;
+    }
+    p = NULL; //this allows strtok to process the same array next time
+  }
+  if(br != UNALLOCATED_BLOCK){
+    perror("path already exists");
+    return EXIT_FAILURE;    
+  }
+  //everything valid, so now we have to perform the operations
+  //first, allocate the new block
+  br = oufs_allocate_new_block();
+  //next, make the inode that will point to the block, and insert a reference to it in the last block.
+  INODE_REFERENCE ir = oufs_allocate_new_inode(br);
+  BLOCK b;
+  BLOCK lastb;
+  vdisk_read_block(lastbr, &lastb);
+  add_inode_to_block(&lastb, ir, lastname);
+  oufs_clean_directory_block(ir,lastb.directory.entry[0].inode_reference,&b);//hardcoded location of ..
+  return EXIT_SUCCESS;
+}
+
 int oufs_rmdir(const char *cwd, const char *path){return EXIT_FAILURE;}
