@@ -19,7 +19,9 @@ INODE new_inode(BLOCK_REFERENCE br){
 
 int add_inode_to_block(BLOCK *b, INODE_REFERENCE ir, const char * name){
   int i = 0;
-  while(b->directory.entry[i++].inode_reference != UNALLOCATED_INODE);
+  while(b->directory.entry[i].inode_reference != UNALLOCATED_INODE){
+    i++;
+  }
   if(i>=DIRECTORY_ENTRIES_PER_BLOCK){
     perror("no more open inode entries");
     return -1;
@@ -34,10 +36,11 @@ INODE_REFERENCE oufs_allocate_new_inode(BLOCK_REFERENCE br){
   BLOCK block;
   // Read the inode blocks
   for(int i = 1; i < N_INODE_BLOCKS + 1; i++){
-    vdisk_read_block(i, &block);//first inode block
+    vdisk_read_block(i, &block);
     for(int j = 0; j < INODES_PER_BLOCK; j++){
       if(block.inodes.inode[j].type==0){//I think this will be set to zero by coincedence.
 	block.inodes.inode[j] = new_inode(br);
+	vdisk_write_block(i, &block);
 	return ((i-1)<<3) + j;
       }
     }
@@ -337,12 +340,13 @@ int print_dir(BLOCK_REFERENCE dir){
       }
     }
     if(debug){fprintf(stderr, "##time to sort. array size %d\n", i);}
-    qsort(&names, sizeof(names[0])*i, sizeof(names[0]), (int (*)(const void *, const void *))&strcmp);
+    qsort(&names, i, sizeof(names[0]), (int (*)(const void *, const void *))&strcmp);
     //note that strcmp takes char *s not void *s so we had to cast it...
     //I have the hunch that __compar_fn_t is specific to gcc, so that type is probably not portable.
     //so we use the ugly (int (*)(const void *, const void *))
     //actually I only need to cast here because I want to avoid a warning from gcc's -Wall option;
     //it would work in any case, probably
+    if(debug){fprintf(stderr, "##sorted. time to print. array size %d\n", i);}
     for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
       if(names[i]){
 	printf("%s%s\n",names[i],"/"); //TODO: actually intelligently detect dirs
@@ -437,6 +441,8 @@ int oufs_mkdir(const char *cwd, const char *path){
   vdisk_read_block(lastbr, &lastb);
   add_inode_to_block(&lastb, ir, lastname);
   oufs_clean_directory_block(ir,lastb.directory.entry[0].inode_reference,&b);//hardcoded location of ..
+  vdisk_write_block(lastbr, &lastb);
+  vdisk_write_block(br, &b);
   return EXIT_SUCCESS;
 }
 
