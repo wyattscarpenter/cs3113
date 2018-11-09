@@ -15,20 +15,23 @@ int main(int argc, char** argv) {
   char cwd[MAX_PATH_LENGTH];
   char disk_name[MAX_PATH_LENGTH];
   oufs_get_environment(cwd, disk_name);
-
+  if(argc<=2){
   // Check arguments
+  char * path = "";
   if(argc == 2) {
+    path = argv[1];
+  }
     // Open the virtual disk
     vdisk_disk_open(disk_name);
 
     // do the thing
-    oufs_list(cwd, argv[1]);
+    oufs_list(cwd, path);
 
     // Clean up
     vdisk_disk_close();
     
   }else{
     // Wrong number of parameters
-    fprintf(stderr, "Usage: zfilez <dirname>\n");
+    fprintf(stderr, "Usage: zfilez [<dirname>]\n");
   }
 }
