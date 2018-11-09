@@ -25,13 +25,27 @@ INODE new_inode(char inode_type, BLOCK_REFERENCE br){
   return new;
 }
 
+int is_full(BLOCK_REFERENCE dbr){ //true if full false otherwise
+  int i = 0;
+  BLOCK b;
+  vdisk_read_block(dbr, &b);
+  while(b.directory.entry[i].inode_reference != UNALLOCATED_INODE){
+    i++;
+  }
+  if(i>=DIRECTORY_ENTRIES_PER_BLOCK){
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 int add_inode_to_block(BLOCK *b, INODE_REFERENCE ir, const char * name){
   int i = 0;
   while(b->directory.entry[i].inode_reference != UNALLOCATED_INODE){
     i++;
   }
   if(i>=DIRECTORY_ENTRIES_PER_BLOCK){
-    perror("no more open inode entries");
+    fprintf(stderr,"no more open inode entries");
     return -1;
   } else {
     b->directory.entry[i].inode_reference = ir;
@@ -430,6 +444,12 @@ int oufs_mkdir(const char *cwd, const char *path){
   oufs_find_file(cwd, path, &pbr, &br, name);
   if(br != UNALLOCATED_BLOCK){
     fprintf(stderr,"path already exists");
+    return EXIT_FAILURE;    
+  }
+ 
+  //check if lastb is full. a bit awkward because we don't want to actually do any operations yet
+  if(is_full(pbr)){
+    fprintf(stderr,"dir full");
     return EXIT_FAILURE;    
   }
   //everything valid, so now we have to perform the operations
