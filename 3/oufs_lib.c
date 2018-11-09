@@ -327,7 +327,58 @@ int oufs_format_disk(char * virtual_disk_name){
   }
 }
 
-int oufs_find_file(char *cwd, char *path, INODE_REFERENCE *parent, INODE_REFERENCE *child, char *local_name);
+BLOCK_REFERENCE dirpdir(BLOCK_REFERENCE br, const char * name){
+  //Progress from DIRectory block to DIRectory block
+  BLOCK b;
+  if(vdisk_read_block(br, &b) == 0) {
+    // Successfully loaded the block:
+    for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
+      if(debug){fprintf(stderr, "##looping. inspecting %s\n", b.directory.entry[i].name);}
+      if (streq(b.directory.entry[i].name, name)){
+	if(debug){fprintf(stderr, "##found match\n");}
+	INODE inode;
+	oufs_read_inode_by_reference(b.directory.entry[i].inode_reference, &inode);
+	return inode.data[0]; //this will be a directory block
+      }
+    }
+  } else {
+    perror("dirpdir couldn't read referenced block");
+  }
+  //ERROR CASE
+  return UNALLOCATED_BLOCK;
+}
+
+int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, BLOCK_REFERENCE *child, char *local_name){
+   //remember, cwd will be / by default, and path will be an empty string by default.
+  BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
+  char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
+  char * name;
+  char * lastname;
+  if(path[0] == '/'){ //path is absolute
+    strcpy(fullpath,path);
+  } else { //path is relative to cwd
+    strcpy(fullpath,cwd);
+    strcat(fullpath,"/"); // extra slash is fine, no slash would be a bug
+    strcat(fullpath,path);
+  }
+  char * p = fullpath;
+  BLOCK_REFERENCE lastbr = br;
+  while( (name = strtok(p, "/")) ){
+    if(debug){fprintf(stderr, "##processing this part of path: %s\n", name);}
+    lastbr=br;
+    lastname=name;
+    br = dirpdir(br, name);
+    if(lastbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
+      perror("a parent directory in the path did not exist");
+      return EXIT_FAILURE;
+    }
+    p = NULL; //this allows strtok to process the same array next time
+  }
+  *parent = lastbr;
+  *child = br;
+  strcpy(local_name, lastname);
+  return EXIT_SUCCESS;
+}
 
 int print_dir(BLOCK_REFERENCE dir){
   if(debug){fprintf(stderr, "##printing dir: %d\n", dir);}
@@ -365,75 +416,22 @@ int print_dir(BLOCK_REFERENCE dir){
   return EXIT_FAILURE;
 }
 
-BLOCK_REFERENCE dirpdir(BLOCK_REFERENCE br, const char * name){
-  //Progress from DIRectory block to DIRectory block
-  BLOCK b;
-  if(vdisk_read_block(br, &b) == 0) {
-    // Successfully loaded the block:
-    for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
-      if(debug){fprintf(stderr, "##looping. inspecting %s\n", b.directory.entry[i].name);}
-      if (streq(b.directory.entry[i].name, name)){
-	if(debug){fprintf(stderr, "##found match\n");}
-	INODE inode;
-	oufs_read_inode_by_reference(b.directory.entry[i].inode_reference, &inode);
-	return inode.data[0]; //this will be a directory block
-      }
-    }
-  } else {
-    perror("dirpdir couldn't read referenced block");
-  }
-  //ERROR CASE
-  return UNALLOCATED_BLOCK;
-}
-
 int oufs_list(const char *cwd, const char *path){
   //remember, cwd will be / by default, and path will be an empty string by default.
-  BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
-  char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
-  char * name;
-  if(path[0] == '/'){ //path is absolute
-    strcpy(fullpath,path);
-  } else { //path is relative to cwd
-    strcpy(fullpath,cwd);
-    strcat(fullpath,"/"); // extra slash is fine, no slash would be a bug
-    strcat(fullpath,path);
-  }
-  char * p = fullpath;
-  while( (name = strtok(p, "/")) ){
-    if(debug){fprintf(stderr, "##processing this part of path: %s\n", name);}
-    br = dirpdir(br, name);
-    p = NULL; //this allows strtok to process the same array next time
-  }
+  BLOCK_REFERENCE br;
+  BLOCK_REFERENCE pbr;
+  char name[FILE_NAME_SIZE];
+  oufs_find_file(cwd, path, &pbr, &br, name);
   print_dir(br);
   return EXIT_SUCCESS;
 }
 
 int oufs_mkdir(const char *cwd, const char *path){
-   //remember, cwd will be / by default, and path will be an empty string by default.
-  BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
-  char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
-  char * name;
-  char * lastname;
-  if(path[0] == '/'){ //path is absolute
-    strcpy(fullpath,path);
-  } else { //path is relative to cwd
-    strcpy(fullpath,cwd);
-    strcat(fullpath,"/"); // extra slash is fine, no slash would be a bug
-    strcat(fullpath,path);
-  }
-  char * p = fullpath;
-  BLOCK_REFERENCE lastbr = br;
-  while( (name = strtok(p, "/")) ){
-    if(debug){fprintf(stderr, "##processing this part of path: %s\n", name);}
-    lastbr=br;
-    lastname=name;
-    br = dirpdir(br, name);
-    if(lastbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
-      perror("a parent directory in the path did not exist");
-      return EXIT_FAILURE;
-    }
-    p = NULL; //this allows strtok to process the same array next time
-  }
+  //remember, cwd will be / by default, and path will be an empty string by default.
+  BLOCK_REFERENCE br;
+  BLOCK_REFERENCE pbr;
+  char name[FILE_NAME_SIZE];
+  oufs_find_file(cwd, path, &pbr, &br, name);
   if(br != UNALLOCATED_BLOCK){
     perror("path already exists");
     return EXIT_FAILURE;    
@@ -445,10 +443,10 @@ int oufs_mkdir(const char *cwd, const char *path){
   INODE_REFERENCE ir = oufs_allocate_new_inode(br);
   BLOCK b;
   BLOCK lastb;
-  vdisk_read_block(lastbr, &lastb);
-  add_inode_to_block(&lastb, ir, lastname);
+  vdisk_read_block(pbr, &lastb);
+  add_inode_to_block(&lastb, ir, name);
   oufs_clean_directory_block(ir,lastb.directory.entry[0].inode_reference,&b);//hardcoded location of ..
-  vdisk_write_block(lastbr, &lastb);
+  vdisk_write_block(pbr, &lastb);
   vdisk_write_block(br, &b);
   return EXIT_SUCCESS;
 }
