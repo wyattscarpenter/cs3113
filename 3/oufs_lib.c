@@ -11,10 +11,11 @@ int string_compare(const void* l, const void* r){
   return strcmp(*(char**)l,*(char**)r);
 }
 
-INODE new_inode(BLOCK_REFERENCE br){
+INODE new_inode(char inode_type, BLOCK_REFERENCE br){
   //NOTE THAT ATM THIS ONLY CONSTRUCTS DIRECTORY INODES
+  //AND SIMPLY ASSIGNS THEM TYPE IT_NONE if necessary.
   INODE new;
-  new.type = IT_DIRECTORY;
+  new.type = inode_type;
   new.n_references = 1;
   new.data[0] = br;
   for(int i = 1; i < BLOCKS_PER_INODE; i++){
@@ -39,15 +40,22 @@ int add_inode_to_block(BLOCK *b, INODE_REFERENCE ir, const char * name){
   }
 }
 
-INODE_REFERENCE oufs_allocate_new_inode(BLOCK_REFERENCE br){
+INODE_REFERENCE oufs_allocate_new_inode(char inode_type, BLOCK_REFERENCE br){
   BLOCK block;
   // Read the inode blocks
   for(int i = 1; i < N_INODE_BLOCKS + 1; i++){
     vdisk_read_block(i, &block);
     for(int j = 0; j < INODES_PER_BLOCK; j++){
-      if(block.inodes.inode[j].type==0){//I think this will be set to zero by coincedence.
-	block.inodes.inode[j] = new_inode(br);
+      if(block.inodes.inode[j].type==IT_NONE){
+	//replace with actual inode
+	block.inodes.inode[j] = new_inode(inode_type,br);
 	vdisk_write_block(i, &block);
+	//update inode table
+	BLOCK m;
+	vdisk_read_block(MASTER_BLOCK_REFERENCE, &m);
+	m.master.inode_allocated_flag[i-1] |= 1<<j;
+	vdisk_write_block(MASTER_BLOCK_REFERENCE, &m);
+	//return inode ref
 	return ((i-1)<<3) + j;
       }
     }
@@ -269,15 +277,13 @@ int oufs_format_disk(char * virtual_disk_name){
     
     //zero all blocks
     BLOCK z;
-    memset(&z, 0, sizeof(z));
+    NULLOUT(z);
     for(BLOCK_REFERENCE i = 0; i < N_BLOCKS_IN_DISK; i++){
       vdisk_write_block(i,&z);
     }
+    
     //actually do the thing
 
-    //TODO: if I have to use this logic again, make fns to initialize
-    //these structs and refactor the code that way
-    
     //1. write the master block
     BLOCK m = z;
     //I happen to know these magic constants are true:
@@ -285,38 +291,28 @@ int oufs_format_disk(char * virtual_disk_name){
     m.master.block_allocated_flag[1] = 0x03; // 8th inode block and first data block
     m.master.inode_allocated_flag[0] = 0x01; // first inode (root)
     vdisk_write_block(MASTER_BLOCK_REFERENCE,&m);
-    
-    //2. write the first inode block, containing the first inode
-    INODE root;
-    root.type = IT_DIRECTORY;
-    root.n_references = 1;
-    root.data[0] = ROOT_DIRECTORY_BLOCK;
-    for(int i = 1; i < BLOCKS_PER_INODE; i++){
-      root.data[i] = UNALLOCATED_BLOCK;
-    }
-    root.size = 2;
 
-    BLOCK ib; // I'm just gonna leave this as mostly garbage
+    //2a. write all inode blocks to unalloc
+    BLOCK block;
+    for(int i = 1; i < N_INODE_BLOCKS + 1; i++){
+      vdisk_read_block(i, &block);
+      for(int j = 0; j < INODES_PER_BLOCK; j++){
+	//replace with unallocated inode
+	block.inodes.inode[j] = new_inode(IT_NONE, UNALLOCATED_BLOCK);
+	vdisk_write_block(i, &block);
+      }
+    }
+    //2. write the first inode block, containing the first inode
+    INODE root = new_inode(IT_DIRECTORY, ROOT_DIRECTORY_BLOCK);
+    
+    BLOCK ib;
+    vdisk_read_block(1, &ib);
     ib.inodes.inode[0] = root;
-    vdisk_write_block(1,&ib); //1 is the first inode block
+    vdisk_write_block(1, &ib); //1 is the first inode block
 
     //3. write the dir block representing /
-    DIRECTORY_ENTRY rootself;
-    strncpy(rootself.name, ".", FILE_NAME_SIZE);
-    rootself.inode_reference = 0;
-    DIRECTORY_ENTRY rootrent;
-    strncpy(rootrent.name, "..", FILE_NAME_SIZE);
-    rootrent.inode_reference = 0;
-    
-
-    DIRECTORY_BLOCK db;
-    for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
-      //not sure what the name field should be for empty ent, probably empty str
-      strncpy(db.entry[i].name, "", FILE_NAME_SIZE);
-      db.entry[i].inode_reference = UNALLOCATED_INODE;
-    }
-    db.entry[0] = rootself;
-    db.entry[1] = rootrent;
+    BLOCK db;
+    oufs_clean_directory_block(0, 0, &db); //these inode refs point back to the root inode
     vdisk_write_block(ROOT_DIRECTORY_BLOCK,&db);
     
     vdisk_disk_close(virtual_disk_name);
@@ -440,7 +436,7 @@ int oufs_mkdir(const char *cwd, const char *path){
   //first, allocate the new block
   br = oufs_allocate_new_block();
   //next, make the inode that will point to the block, and insert a reference to it in the last block.
-  INODE_REFERENCE ir = oufs_allocate_new_inode(br);
+  INODE_REFERENCE ir = oufs_allocate_new_inode(IT_DIRECTORY, br);
   BLOCK b;
   BLOCK lastb;
   vdisk_read_block(pbr, &lastb);
