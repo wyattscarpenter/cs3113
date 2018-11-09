@@ -36,14 +36,14 @@ INODE_REFERENCE oufs_allocate_new_inode(BLOCK_REFERENCE br){
   for(int i = 1; i < N_INODE_BLOCKS + 1; i++){
     vdisk_read_block(i, &block);//first inode block
     for(int j = 0; j < INODES_PER_BLOCK; j++){
-      if(block.inodes.inode[j].type==IT_NONE){//I think this will be set to zero by coincedence.
+      if(block.inodes.inode[j].type==0){//I think this will be set to zero by coincedence.
 	block.inodes.inode[j] = new_inode(br);
 	return ((i-1)<<3) + j;
       }
     }
   }
   if(debug){
-    fprintf(stderr, "No open inodes\n");
+    fprintf(stderr, "#No open inodes\n");
   }
   return(UNALLOCATED_INODE);
 }
@@ -188,13 +188,13 @@ BLOCK_REFERENCE oufs_allocate_new_block()
   vdisk_write_block(MASTER_BLOCK_REFERENCE, &block);
 
   if(debug)
-    fprintf(stderr, "Allocating block=%d (%d)\n", block_byte, block_bit);
+    fprintf(stderr, "##Allocating block byte %d bit %d\n", block_byte, block_bit);
 
   // Compute the block index
   BLOCK_REFERENCE block_reference = (block_byte << 3) + block_bit;
 
   if(debug)
-    fprintf(stderr, "Allocating block=%d\n", block_reference);
+    fprintf(stderr, "Allocated block at block ref %d\n", block_reference);
   
   // Done
   return(block_reference);
