@@ -365,7 +365,7 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
     lastname=name;
     br = dirpdir(br, name);
     if(lastbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
-      perror("a parent directory in the path did not exist");
+      fprintf(stderr,"a parent directory in the path did not exist");
       return EXIT_FAILURE;
     }
     p = NULL; //this allows strtok to process the same array next time
@@ -429,7 +429,7 @@ int oufs_mkdir(const char *cwd, const char *path){
   char name[FILE_NAME_SIZE];
   oufs_find_file(cwd, path, &pbr, &br, name);
   if(br != UNALLOCATED_BLOCK){
-    perror("path already exists");
+    fprintf(stderr,"path already exists");
     return EXIT_FAILURE;    
   }
   //everything valid, so now we have to perform the operations
