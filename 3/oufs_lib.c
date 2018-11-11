@@ -25,15 +25,19 @@ INODE new_inode(char inode_type, BLOCK_REFERENCE br){
   return new;
 }
 
-void rm_from_block(const char * name, BLOCK* db){
+INODE_REFERENCE rm_from_block(const char * name, BLOCK* db){
+  //Why does this return an ir? because I didn't want to write the logic twice.
   int i = 0;
   while(db->directory.entry[i].inode_reference != UNALLOCATED_INODE){
     i++;
     if(streq(db->directory.entry[i].name, name)){
       db->directory.entry[i].name[0] = '\0';
+      INODE_REFERENCE ir = db->directory.entry[i].inode_reference;
       db->directory.entry[i].inode_reference = UNALLOCATED_INODE;
+      return ir;
     }
   }
+  return UNALLOCATED_INODE;
 }
 
 int is_full(BLOCK_REFERENCE dbr){ //true if full false otherwise
@@ -511,9 +515,22 @@ int oufs_rmdir(const char *cwd, const char *path){
   //everything valid, so now we have to perform the operations
   BLOCK b;
   BLOCK lastb;
+  INODE_REFERENCE ir;
   vdisk_read_block(pbr, &lastb);
-  rm_from_block(name, &lastb);
+  ir = rm_from_block(name, &lastb);
   vdisk_write_block(pbr, &lastb);
-  //DIDN'T GET TO THE LAST BIT
+  //deallocate the inode (possibly gratuitous)
+  vdisk_read_block(ir2br(ir), &b);
+  b.inodes.inode[ir2ei(ir)] = new_inode(IT_NONE, UNALLOCATED_BLOCK); 
+  vdisk_write_block(ir2br(ir), &b);
+  ////deallocate the block (poss. grat.)
+  //vdisk_read_block(br, &b);
+  //eh... decided not to do it
+  
+  //deallocate master block bits
+  vdisk_read_block(MASTER_BLOCK_REFERENCE, &b);
+  b.master.inode_allocated_flag[ir / 8] ^= (1 << (ir % 8)); //ooo so much arithmetic! magic!
+  b.master.block_allocated_flag[br/8] ^= (1 << (br % 8));
+  vdisk_write_block(MASTER_BLOCK_REFERENCE, &b);
   return EXIT_SUCCESS;
 }
