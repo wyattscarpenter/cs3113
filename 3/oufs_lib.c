@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "oufs_lib.h"
-#include "widio.c"
-
+#include "widio.h"
 #define debug 1
 
 int string_compare(const void* l, const void* r){
@@ -125,7 +124,7 @@ void oufs_get_environment(char *cwd, char *disk_name)
     strcpy(cwd, "/");
   }else{
     // Exists
-    strncpy(cwd, str, MAX_PATH_LENGTH-1);
+    STRNULLCOPY(cwd, str, MAX_PATH_LENGTH-1);
   }
 
   // Virtual disk location
@@ -135,7 +134,7 @@ void oufs_get_environment(char *cwd, char *disk_name)
     strcpy(disk_name, "vdisk1");
   }else{
     // Exists: copy
-    strncpy(disk_name, str, MAX_PATH_LENGTH-1);
+    STRNULLCOPY(disk_name, str, MAX_PATH_LENGTH-1);
   }
 
 }
@@ -178,12 +177,12 @@ void oufs_clean_directory_block(INODE_REFERENCE self, INODE_REFERENCE parent, BL
   // Now we will set up the two fixed directory entries
 
   // Self
-  strncpy(entry.name, ".", 2);
+  STRNULLCOPY(entry.name, ".", 2);
   entry.inode_reference = self;
   block->directory.entry[0] = entry;
 
   // Parent (same as self
-  strncpy(entry.name, "..", 3);
+  STRNULLCOPY(entry.name, "..", 3);
   entry.inode_reference = parent;
   block->directory.entry[1] = entry;
   
