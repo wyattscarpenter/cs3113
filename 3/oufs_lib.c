@@ -2,10 +2,10 @@
 #include "oufs_lib.h"
 #include "widio.h"
 #define debug 1
-
+#define dprintf(...) if(debug){fprintf (stderr, __VA_ARGS__);}
 BLOCK get(BLOCK_REFERENCE br){
   //I wrote this function fairly late in the game.
-  //we OO now boys,
+  //we OO now boys
   BLOCK b;
   vdisk_read_block(br, &b);
   return b;
@@ -13,6 +13,11 @@ BLOCK get(BLOCK_REFERENCE br){
 int set(BLOCK_REFERENCE br, BLOCK b){
   //a complimentary fn to get, but not quite an oo setter.
   return vdisk_write_block(br, &b);
+}
+INODE get_inode(INODE_REFERENCE ir){
+  INODE i;
+  oufs_read_inode_by_reference(ir, &i);
+  return i;
 }
 
 int string_compare(const void* l, const void* r){
@@ -72,6 +77,7 @@ int is_empty(BLOCK_REFERENCE dbr){ //true if empty false otherwise
   while(b.directory.entry[i].inode_reference != UNALLOCATED_INODE){
     i++;
   }
+  dprintf("##is_empty records this many entries: %d\n", i);
   if(i==2){
     return 1;
   } else {
@@ -497,7 +503,7 @@ int oufs_mkdir(const char *cwd, const char *path){
     return EXIT_FAILURE;    
   }
  
-  //check if lastb is full
+  //check if pbr is full
   //a bit awkward because we don't want to actually do any operations yet
   if(is_full(pbr)){
     fprintf(stderr,"dir full\n");
@@ -532,12 +538,12 @@ int oufs_rmdir(const char *cwd, const char *path){
   char name[FILE_NAME_SIZE];
   oufs_find_file(cwd, path, &pbr, &br, name, &iop);
   if(br == UNALLOCATED_BLOCK){
-    fprintf(stderr,"path doesn't exist");
+    fprintf(stderr,"path doesn't exist\n");
     return EXIT_FAILURE;    
   }
  
-  //check if lastb is full. a bit awkward because we don't want to actually do any operations yet
-  if(is_empty(pbr)){
+  //check if br is empty. a bit awkward because we don't want to actually do any operations yet
+  if(!is_empty(br)){
     fprintf(stderr,"dir nonempty");
     return EXIT_FAILURE;    
   }
