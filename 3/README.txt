@@ -7,10 +7,11 @@ Email address: w@ou.edu
 Date: 11/8/2018
 
 Description
-To solve this programming problem, I essentially created several small executables that serve only to call library code for their associated functions. These executables and the expected behavior are specified in https://oudalab.github.io/cs3113fa18/projects/project3.html I found the suggested helper functions to be pretty good ideas, so I implemented them as well, along with some other helper functions that occured to me along the way.
+To solve this programming problem, I essentially created several small executables that serve only to call library code for their associated functions. These executables and the expected behavior are specified in https://oudalab.github.io/cs3113fa18/projects/project3.html. I found the suggested helper functions to be pretty good ideas, so I implemented them as well, along with some other helper functions that occured to me along the way.
 With regard to library code, I made essentially all of my edits to oufs_lib.c/.h
 My implementation of this project is not very exciting. It is mostly perfunctory and as-expected, as can be seen by how I just used the suggested helper functions. Attempts were made at all levels to do the right thing. Perhaps the only thing in my code I am vaguely fond of is dirpdir, a function that progresses from one dir to the next based on name provided.
-During this project, I began development of "widio.c", a file that implements crucial idiosyncracies I use in C, such as streq, a function that checks if strs are equal (like strcmp, but the right way around)
+My implementation of this project was actually hindered by a conceptual misstep I made early on: I decided to focus my project around directory blocks, instead of inodes. Conceptually, I found this simpler, as it allowed me to pretend I was dealing with a slightly convulted linked list. However, it then became apparent that this was the wrong strategy, as I commonly needed to edit the inodes. So all my code is, like, left-handed, funhouse-mirrored.
+During this project, I began development of "widio.h", a file that implements crucial idiosyncracies I use in C, such as streq, a function that checks if strs are equal (like strcmp, but the right way around)
 
 To Run
 Run the appropriate executables located in this folder. If there are no such executables, run make. You may wish to set your environment variables to foreign and exciting values, as specified in the specification, but sensible defaults are provided otherwise.
