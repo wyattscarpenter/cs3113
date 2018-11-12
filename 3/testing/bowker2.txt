@@ -1,0 +1,19 @@
+for i in {1..4};
+
+do
+
+  ./zmkdir /$i
+
+  for j in {1..15};
+
+  do
+
+    ./zmkdir /$i/$j
+
+  done
+
+  echo
+
+done
+
+./zinspect -master

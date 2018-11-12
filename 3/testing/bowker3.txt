@@ -1,0 +1,18 @@
+./zformat
+./zmkdir a
+./zmkdir b
+./zmkdir c
+./zmkdir b/d
+#./zinspect -master
+./zmkdir e
+./zmkdir f
+./zmkdir g
+./zmkdir g/h
+./zmkdir g/i
+./zrmdir e
+./zrmdir f
+./zrmdir g/h
+./zrmdir g
+./zrmdir g/i
+./zrmdir g
+./zinspect -master

@@ -1,0 +1,17 @@
+./zformat
+./zmkdir a
+./zmkdir b
+./zmkdir c
+./zmkdir b/d
+./zmkdir e
+./zmkdir f
+./zmkdir g
+./zmkdir g/h
+./zmkdir g/i
+./zfilez
+./zrmdir e
+./zrmdir f
+./zrmdir g/h
+./zrmdir g
+./zrmdir g/i
+./zrmdir g

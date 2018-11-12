@@ -45,7 +45,7 @@ INODE new_inode(char inode_type, BLOCK_REFERENCE br){
 INODE_REFERENCE rm_from_block(const char * name, BLOCK* db){
   //Why does this return an ir? because I didn't want to write the logic twice.
   int i = 0;
-  while(db->directory.entry[i].inode_reference != UNALLOCATED_INODE){
+  while(i<DIRECTORY_ENTRIES_PER_BLOCK){
     i++;
     if(streq(db->directory.entry[i].name, name)){
       db->directory.entry[i].name[0] = '\0';
@@ -72,14 +72,16 @@ int is_full(BLOCK_REFERENCE dbr){ //true if full false otherwise
 }
 
 int is_empty(BLOCK_REFERENCE dbr){ //true if empty false otherwise
-  int i = 0;
+  int j = 0;
   BLOCK b;
   vdisk_read_block(dbr, &b);
-  while(b.directory.entry[i].inode_reference != UNALLOCATED_INODE){
-    i++;
+  for(int i = 0; i<DIRECTORY_ENTRIES_PER_BLOCK; i++){
+    if(b.directory.entry[i].inode_reference != UNALLOCATED_INODE){
+      j++;
+    }
   }
-  dprintf("##is_empty records this many entries: %d\n", i);
-  if(i==2){
+  dprintf("##is_empty records this many entries: %d\n", j);
+  if(j==2){
     return 1;
   } else {
     return 0;
@@ -447,13 +449,12 @@ int print_dir(BLOCK_REFERENCE dir){
 
   char *names[DIRECTORY_ENTRIES_PER_BLOCK]; //array of char pointers
   NULLOUT(names);
-  
-  int i = 0;
+
   int j = 0;
   BLOCK b;
   if(vdisk_read_block(dir, &b) == 0) {
     // Successfully loaded the block:
-    for(; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
+    for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
       if(!b.directory.entry[i].name[0]){
 	continue;
       } else {
@@ -461,14 +462,14 @@ int print_dir(BLOCK_REFERENCE dir){
 	j++;
       }
     }
-    if(debug){fprintf(stderr, "##time to sort. array size %d\n", i);}
+    if(debug){fprintf(stderr, "##time to sort. array size %d\n", j);}
     qsort(&names, j, sizeof(names[0]), &string_compare);
     //note that strcmp takes char *s not void *s so we had to cast it...
     //I have the hunch that __compar_fn_t is specific to gcc, so that type is probably not portable.
     //so we use the ugly (int (*)(const void *, const void *))
     //actually I only need to cast here because I want to avoid a warning from gcc's -Wall option;
     //it would work in any case, probably
-    if(debug){fprintf(stderr, "##sorted. time to print. array size %d\n", i);}
+    if(debug){fprintf(stderr, "##sorted. time to print. array size %d\n", j);}
     for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
       if(names[i]){
 	printf("%s%s\n",names[i],"/"); //TODO: actually intelligently detect dirs
@@ -566,7 +567,7 @@ int oufs_rmdir(const char *cwd, const char *path){
   vdisk_read_block(pbr, &lastb);
   ir = rm_from_block(name, &lastb);
   vdisk_write_block(pbr, &lastb);
-  //deallocate the inode (possibly gratuitous)
+  dprintf("deallocate the inode (possibly gratuitous)\n");
   vdisk_read_block(ir2br(ir), &b);
   b.inodes.inode[ir2ei(ir)] = new_inode(IT_NONE, UNALLOCATED_BLOCK); 
   vdisk_write_block(ir2br(ir), &b);
@@ -574,13 +575,13 @@ int oufs_rmdir(const char *cwd, const char *path){
   //vdisk_read_block(br, &b);
   //eh... decided not to do it
 
-  //adjust inode size
+  dprintf("adjust inode size\n");
   INODE i;
   oufs_read_inode_by_reference(iop, &i);
   i.size -= 1;
   oufs_write_inode_by_reference(iop, &i);
   
-  //deallocate master block bits
+  dprintf("deallocate master block bits\n");
   vdisk_read_block(MASTER_BLOCK_REFERENCE, &b);
   b.master.inode_allocated_flag[ir / 8] ^= (1 << (ir % 8)); //ooo so much arithmetic! magic!
   b.master.block_allocated_flag[br/8] ^= (1 << (br % 8));
