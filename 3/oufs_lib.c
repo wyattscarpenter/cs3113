@@ -404,8 +404,8 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
   char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
   char * name;
-  char * lastname;
-  if(path[0] == '/'){ //path is absolute
+  char * lastname = ""; //this in "last name" in the sense of "name at end" 
+  if(path && path[0] == '/'){ //path is absolute
     strcpy(fullpath,path);
   } else { //path is relative to cwd
     strcpy(fullpath,cwd);
@@ -413,23 +413,28 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
     strcat(fullpath,path);
   }
   char * p = fullpath;
-  BLOCK_REFERENCE lastbr = br;
+  BLOCK_REFERENCE pbr = br;
   while( (name = strtok(p, "/")) ){
     if(debug){fprintf(stderr, "##processing this part of path: %s\n", name);}
-    iop = get(lastbr).directory.entry[0].inode_reference;
-    lastbr=br;
+    iop = get(pbr).directory.entry[0].inode_reference;
+    pbr=br;
     lastname=name;
     br = dirpdir(br, name);
-    if(lastbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
+    if(pbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
       fprintf(stderr,"a parent directory in the path did not exist\n");
       return EXIT_FAILURE;
     }
     p = NULL; //this allows strtok to process the same array next time
   }
-  *parent = lastbr;
+  if(debug){fprintf(stderr, "##assigning values in find_files\n");}
+  if(debug){fprintf(stderr, "##assigning parent in find_files\n");}
+  *parent = pbr;
+  if(debug){fprintf(stderr, "##assigning child in find_files\n");}
   *child = br;
-  if(inode_of_parent){*inode_of_parent = iop;}
+  if(debug){fprintf(stderr, "##assigning string in find_files\n");}
   strcpy(local_name, lastname);
+  if(debug){fprintf(stderr, "##assigning iop in find_files\n");}
+  *inode_of_parent = iop;
   return EXIT_SUCCESS;
 }
 
@@ -473,8 +478,9 @@ int oufs_list(const char *cwd, const char *path){
   //remember, cwd will be / by default, and path will be an empty string by default.
   BLOCK_REFERENCE br;
   BLOCK_REFERENCE pbr;
+  INODE_REFERENCE iop;
   char name[FILE_NAME_SIZE];
-  oufs_find_file(cwd, path, &pbr, &br, name, NULL);
+  oufs_find_file(cwd, path, &pbr, &br, name, &iop);
   print_dir(br);
   return EXIT_SUCCESS;
 }
