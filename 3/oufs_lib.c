@@ -3,6 +3,18 @@
 #include "widio.h"
 #define debug 1
 
+BLOCK get(BLOCK_REFERENCE br){
+  //I wrote this function fairly late in the game.
+  //we OO now boys,
+  BLOCK b;
+  vdisk_read_block(br, &b);
+  return b;
+}
+int set(BLOCK_REFERENCE br, BLOCK b){
+  //a complimentary fn to get, but not quite an oo setter.
+  return vdisk_write_block(br, &b);
+}
+
 int string_compare(const void* l, const void* r){
   //a wrapper function to use strcmp with qsort
   //basically each void * is going to be point at our char *,
@@ -261,7 +273,7 @@ BLOCK_REFERENCE oufs_allocate_new_block()
 }
 
 BLOCK_REFERENCE ir2br(INODE_REFERENCE i){
-  //returns block reference given inode reference
+  //returns block reference of inode block which holds the referenced inode
   return i / INODES_PER_BLOCK + 1;
 }
 
@@ -386,8 +398,9 @@ BLOCK_REFERENCE dirpdir(BLOCK_REFERENCE br, const char * name){
   return UNALLOCATED_BLOCK;
 }
 
-int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, BLOCK_REFERENCE *child, char *local_name){
+int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, BLOCK_REFERENCE *child, char *local_name, INODE_REFERENCE *inode_of_parent){
    //remember, cwd will be / by default, and path will be an empty string by default.
+  INODE_REFERENCE iop = 0; //root inode
   BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
   char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
   char * name;
@@ -403,17 +416,19 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   BLOCK_REFERENCE lastbr = br;
   while( (name = strtok(p, "/")) ){
     if(debug){fprintf(stderr, "##processing this part of path: %s\n", name);}
+    iop = get(lastbr).directory.entry[0].inode_reference;
     lastbr=br;
     lastname=name;
     br = dirpdir(br, name);
     if(lastbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
-      fprintf(stderr,"a parent directory in the path did not exist");
+      fprintf(stderr,"a parent directory in the path did not exist\n");
       return EXIT_FAILURE;
     }
     p = NULL; //this allows strtok to process the same array next time
   }
   *parent = lastbr;
   *child = br;
+  if(inode_of_parent){*inode_of_parent = iop;}
   strcpy(local_name, lastname);
   return EXIT_SUCCESS;
 }
@@ -459,25 +474,27 @@ int oufs_list(const char *cwd, const char *path){
   BLOCK_REFERENCE br;
   BLOCK_REFERENCE pbr;
   char name[FILE_NAME_SIZE];
-  oufs_find_file(cwd, path, &pbr, &br, name);
+  oufs_find_file(cwd, path, &pbr, &br, name, NULL);
   print_dir(br);
   return EXIT_SUCCESS;
 }
 
 int oufs_mkdir(const char *cwd, const char *path){
-  //remember, cwd will be / by default, and path will be an empty string by default.
+  //remember, by default cwd will be "/" and path will be ""
   BLOCK_REFERENCE br;
   BLOCK_REFERENCE pbr;
+  INODE_REFERENCE iop;
   char name[FILE_NAME_SIZE];
-  oufs_find_file(cwd, path, &pbr, &br, name);
+  oufs_find_file(cwd, path, &pbr, &br, name, &iop);
   if(br != UNALLOCATED_BLOCK){
     fprintf(stderr,"path already exists");
     return EXIT_FAILURE;    
   }
  
-  //check if lastb is full. a bit awkward because we don't want to actually do any operations yet
+  //check if lastb is full
+  //a bit awkward because we don't want to actually do any operations yet
   if(is_full(pbr)){
-    fprintf(stderr,"dir full");
+    fprintf(stderr,"dir full\n");
     return EXIT_FAILURE;    
   }
   //everything valid, so now we have to perform the operations
@@ -489,7 +506,13 @@ int oufs_mkdir(const char *cwd, const char *path){
   BLOCK lastb;
   vdisk_read_block(pbr, &lastb);
   add_inode_to_block(&lastb, ir, name);
-  oufs_clean_directory_block(ir,lastb.directory.entry[0].inode_reference,&b);//hardcoded location of ..
+  //adjust inode size
+  INODE i;
+  oufs_read_inode_by_reference(iop, &i);
+  i.size += 1;
+  oufs_write_inode_by_reference(iop, &i);
+  //hardcoded location of .. in next line
+  oufs_clean_directory_block(ir,lastb.directory.entry[0].inode_reference,&b);
   vdisk_write_block(pbr, &lastb);
   vdisk_write_block(br, &b);
   return EXIT_SUCCESS;
@@ -499,8 +522,9 @@ int oufs_rmdir(const char *cwd, const char *path){
     //remember, cwd will be / by default, and path will be an empty string by default.
   BLOCK_REFERENCE br;
   BLOCK_REFERENCE pbr;
+  INODE_REFERENCE iop;
   char name[FILE_NAME_SIZE];
-  oufs_find_file(cwd, path, &pbr, &br, name);
+  oufs_find_file(cwd, path, &pbr, &br, name, &iop);
   if(br == UNALLOCATED_BLOCK){
     fprintf(stderr,"path doesn't exist");
     return EXIT_FAILURE;    
@@ -525,6 +549,12 @@ int oufs_rmdir(const char *cwd, const char *path){
   ////deallocate the block (poss. grat.)
   //vdisk_read_block(br, &b);
   //eh... decided not to do it
+
+  //adjust inode size
+  INODE i;
+  oufs_read_inode_by_reference(iop, &i);
+  i.size -= 1;
+  oufs_write_inode_by_reference(iop, &i);
   
   //deallocate master block bits
   vdisk_read_block(MASTER_BLOCK_REFERENCE, &b);
