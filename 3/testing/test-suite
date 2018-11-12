@@ -1,5 +1,5 @@
 (cd ..; rm vdisk1; make clean; make)
 
 for i in $( find .  -name "*.txt" -not -name "*.*.txt" ); do
-    echo $i: $(./run-test $i && echo PASS || echo FAIL)
+    echo $i: $(./run-test $i 2>/dev/null && echo PASS || echo FAIL)
 done

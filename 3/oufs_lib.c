@@ -3,6 +3,7 @@
 #include "widio.h"
 #define debug 1
 #define dprintf(...) if(debug){fprintf (stderr, __VA_ARGS__);}
+
 BLOCK get(BLOCK_REFERENCE br){
   //I wrote this function fairly late in the game.
   //we OO now boys
@@ -98,32 +99,6 @@ int add_inode_to_block(BLOCK *b, INODE_REFERENCE ir, const char * name){
     strcpy(b->directory.entry[i].name, name);
     return 0;
   }
-}
-
-INODE_REFERENCE oufs_allocate_new_inode(char inode_type, BLOCK_REFERENCE br){
-  BLOCK block;
-  // Read the inode blocks
-  for(int i = 1; i < N_INODE_BLOCKS + 1; i++){
-    vdisk_read_block(i, &block);
-    for(int j = 0; j < INODES_PER_BLOCK; j++){
-      if(block.inodes.inode[j].type==IT_NONE){
-	//replace with actual inode
-	block.inodes.inode[j] = new_inode(inode_type,br);
-	vdisk_write_block(i, &block);
-	//update inode table
-	BLOCK m;
-	vdisk_read_block(MASTER_BLOCK_REFERENCE, &m);
-	m.master.inode_allocated_flag[i-1] |= 1<<j;
-	vdisk_write_block(MASTER_BLOCK_REFERENCE, &m);
-	//return inode ref
-	return ((i-1)<<3) + j;
-      }
-    }
-  }
-  if(debug){
-    fprintf(stderr, "#No open inodes\n");
-  }
-  return(UNALLOCATED_INODE);
 }
 
 /**
@@ -301,9 +276,9 @@ int ir2ei(INODE_REFERENCE i){
  */
 int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
 {
-  if(debug)
+  if(debug){
     fprintf(stderr, "Fetching inode %d\n", i);
-
+  }
   // Find the address of the inode block and the inode within the block
   BLOCK_REFERENCE block = i / INODES_PER_BLOCK + 1;
   int element = (i % INODES_PER_BLOCK);
@@ -330,6 +305,29 @@ int oufs_write_inode_by_reference(INODE_REFERENCE i, INODE *inode){
   }
   // Error case
   return EXIT_FAILURE;
+}
+
+INODE_REFERENCE oufs_allocate_new_inode(char inode_type, BLOCK_REFERENCE br){
+  BLOCK block;
+  INODE_REFERENCE ir;
+  vdisk_read_block(MASTER_BLOCK_REFERENCE, &block);
+  // Read the inode blocks
+  for(int i = 0; i < N_INODE_BLOCKS; i++){
+    if(block.master.inode_allocated_flag[i]!=0xff){
+      int bit = oufs_find_open_bit(block.master.inode_allocated_flag[i]);
+      block.master.inode_allocated_flag[i] |= 1<<bit;
+      vdisk_write_block(MASTER_BLOCK_REFERENCE, &block);
+      //place actual inode
+      ir = (i<<3)+bit;
+      INODE inode = new_inode(inode_type,br);
+      oufs_write_inode_by_reference(ir, &inode);
+      return ir;
+    }
+  }
+  if(debug){
+    fprintf(stderr, "#No open inodes\n");
+  }
+  return(UNALLOCATED_INODE);
 }
 
 int oufs_format_disk(char * virtual_disk_name){
@@ -359,8 +357,8 @@ int oufs_format_disk(char * virtual_disk_name){
       for(int j = 0; j < INODES_PER_BLOCK; j++){
 	//replace with unallocated inode
 	block.inodes.inode[j] = new_inode(IT_NONE, UNALLOCATED_BLOCK);
-	vdisk_write_block(i, &block);
       }
+      vdisk_write_block(i, &block);
     }
     //2. write the first inode block, containing the first inode
     INODE root = new_inode(IT_DIRECTORY, ROOT_DIRECTORY_BLOCK);
@@ -389,16 +387,16 @@ BLOCK_REFERENCE dirpdir(BLOCK_REFERENCE br, const char * name){
   if(vdisk_read_block(br, &b) == 0) {
     // Successfully loaded the block:
     for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
-      if(debug){fprintf(stderr, "##looping. inspecting %s\n", b.directory.entry[i].name);}
-      if (streq(b.directory.entry[i].name, name)){
-	if(debug){fprintf(stderr, "##found match\n");}
+      dprintf("##looping. inspecting %s\n", b.directory.entry[i].name);
+      if(streq(b.directory.entry[i].name, name)){
+	dprintf("##found match\n");
 	INODE inode;
 	oufs_read_inode_by_reference(b.directory.entry[i].inode_reference, &inode);
 	return inode.data[0]; //this will be a directory block
       }
     }
   } else {
-    perror("dirpdir couldn't read referenced block");
+    dprintf("dirpdir couldn't read referenced block\n");
   }
   //ERROR CASE
   return UNALLOCATED_BLOCK;
@@ -428,7 +426,7 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
     br = dirpdir(br, name);
     if(pbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
       fprintf(stderr,"a parent directory in the path did not exist\n");
-      return EXIT_FAILURE;
+      exit(EXIT_FAILURE);
     }
     p = NULL; //this allows strtok to process the same array next time
   }
@@ -451,18 +449,20 @@ int print_dir(BLOCK_REFERENCE dir){
   NULLOUT(names);
   
   int i = 0;
+  int j = 0;
   BLOCK b;
   if(vdisk_read_block(dir, &b) == 0) {
     // Successfully loaded the block:
     for(; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
       if(!b.directory.entry[i].name[0]){
-	break;
+	continue;
       } else {
-	names[i] = b.directory.entry[i].name;
+	names[j] = b.directory.entry[i].name;
+	j++;
       }
     }
     if(debug){fprintf(stderr, "##time to sort. array size %d\n", i);}
-    qsort(&names, i, sizeof(names[0]), &string_compare);
+    qsort(&names, j, sizeof(names[0]), &string_compare);
     //note that strcmp takes char *s not void *s so we had to cast it...
     //I have the hunch that __compar_fn_t is specific to gcc, so that type is probably not portable.
     //so we use the ugly (int (*)(const void *, const void *))
@@ -481,6 +481,7 @@ int print_dir(BLOCK_REFERENCE dir){
 }
 
 int oufs_list(const char *cwd, const char *path){
+  //setbuf(stdout, NULL); //might need this line some day
   //remember, cwd will be / by default, and path will be an empty string by default.
   BLOCK_REFERENCE br;
   BLOCK_REFERENCE pbr;
@@ -499,7 +500,7 @@ int oufs_mkdir(const char *cwd, const char *path){
   char name[FILE_NAME_SIZE];
   oufs_find_file(cwd, path, &pbr, &br, name, &iop);
   if(br != UNALLOCATED_BLOCK){
-    fprintf(stderr,"path already exists");
+    fprintf(stderr,"path already exists\n");
     return EXIT_FAILURE;    
   }
  
@@ -509,11 +510,22 @@ int oufs_mkdir(const char *cwd, const char *path){
     fprintf(stderr,"dir full\n");
     return EXIT_FAILURE;    
   }
-  //everything valid, so now we have to perform the operations
+  dprintf("everything valid, so now we have to perform the operations\n");
   //first, allocate the new block
   br = oufs_allocate_new_block();
-  //next, make the inode that will point to the block, and insert a reference to it in the last block.
+  if(br == UNALLOCATED_BLOCK){
+    return EXIT_FAILURE;
+  }
   INODE_REFERENCE ir = oufs_allocate_new_inode(IT_DIRECTORY, br);
+  if(ir == UNALLOCATED_INODE){
+    //must deflag the block we just flagged
+    BLOCK b;
+    vdisk_read_block(MASTER_BLOCK_REFERENCE, &b);
+    b.master.block_allocated_flag[br/8] ^= (1 << (br % 8)); //ooo so much arithmetic! magic
+    vdisk_write_block(MASTER_BLOCK_REFERENCE, &b);
+    return EXIT_FAILURE;
+  }
+  //next, make the inode that will point to the block, and insert a reference to it in the last block.
   BLOCK b;
   BLOCK lastb;
   vdisk_read_block(pbr, &lastb);
@@ -547,7 +559,7 @@ int oufs_rmdir(const char *cwd, const char *path){
     fprintf(stderr,"dir nonempty");
     return EXIT_FAILURE;    
   }
-  //everything valid, so now we have to perform the operations
+  dprintf("everything valid, so now we have to perform the operations\n");
   BLOCK b;
   BLOCK lastb;
   INODE_REFERENCE ir;
