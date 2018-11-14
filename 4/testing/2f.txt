@@ -1,0 +1,10 @@
+#/bin/bash
+
+./zformat 
+echo "#######" 
+./zinspect -master 
+echo "#######" 
+./zinspect -inode 0 
+echo "#######" 
+./zinspect -dblock 9
+echo "#######"

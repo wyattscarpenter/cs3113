@@ -1,0 +1,11 @@
+#/bin/bash
+
+./zformat 
+echo "#######" 
+./zmkdir foo
+./zfilez
+echo "#######" 
+./zinspect -master 
+echo "#######" 
+./zinspect -inode 1
+echo "#######" 

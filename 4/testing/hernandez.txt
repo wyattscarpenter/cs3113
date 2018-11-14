@@ -1,0 +1,24 @@
+#!/bin/bash
+./zformat
+echo "#######"
+./zinspect -master
+echo "#######"
+./zfilez
+echo "#######"
+for i in `seq 14`; do
+    ./zmkdir $i
+done
+./zfilez
+echo "#######"
+./zinspect -master
+./zmkdir 15
+echo "#######"
+./zinspect -master
+echo "#######"
+./zfilez
+echo "#######"
+./zrmdir 1
+./zinspect -master
+echo "#######"
+./zfilez
+echo "#######"

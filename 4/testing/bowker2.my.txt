@@ -1,0 +1,29 @@
+
+
+
+
+Inode table:
+ff
+ff
+ff
+ff
+ff
+ff
+ff
+Block table:
+ff
+ff
+ff
+ff
+ff
+ff
+ff
+ff
+01
+00
+00
+00
+00
+00
+00
+00
