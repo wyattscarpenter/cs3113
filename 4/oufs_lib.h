@@ -26,11 +26,15 @@ int oufs_find_open_bit(unsigned char value);
 
 // PROJECT 4 ONLY
 int oufs_touch(const char *cwd, const char *path);
+int oufs_create(const char *cwd, const char *path);
+int oufs_remove(const char *cwd, const char *path);
+int oufs_more(const char *cwd, const char *path);
+int oufs_link(const char *cwd, const char *path_src, const char *path_dst);
+
+//Unlov-ed boys
 OUFILE* oufs_fopen(char *cwd, char *path, char *mode);
 void oufs_fclose(OUFILE *fp);
 int oufs_fwrite(OUFILE *fp, unsigned char * buf, int len);
 int oufs_fread(OUFILE *fp, unsigned char * buf, int len);
-int oufs_remove(char *cwd, char *path);
-int oufs_link(char *cwd, char *path_src, char *path_dst);
 
 #endif

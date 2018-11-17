@@ -20,6 +20,9 @@ INODE get_inode(INODE_REFERENCE ir){
   oufs_read_inode_by_reference(ir, &i);
   return i;
 }
+int set_inode(INODE_REFERENCE ir, INODE * i){
+  return oufs_write_inode_by_reference(ir, i);
+}
 
 int string_compare(const void* l, const void* r){
   //a wrapper function to use strcmp with qsort
@@ -648,5 +651,47 @@ int oufs_touch(const char *cwd, const char *path){
   oufs_write_inode_by_reference(iop, &i);
   //hardcoded location of .. in next line
   vdisk_write_block(pbr, &lastb);
+  return EXIT_SUCCESS;
+}
+int oufs_create(const char *cwd, const char *path){
+  return EXIT_FAILURE;
+}
+int oufs_remove(const char *cwd, const char *path){
+  return EXIT_FAILURE;
+}
+int oufs_more(const char *cwd, const char *path){
+  return EXIT_FAILURE;
+}
+int oufs_link(const char *cwd, const char *path_src, const char *path_dst){
+  BLOCK_REFERENCE br;
+  BLOCK_REFERENCE pbr;
+  INODE_REFERENCE iop;
+  INODE_REFERENCE ioc;
+  char name[FILE_NAME_SIZE];
+  oufs_find_file(cwd, path_src, &pbr, &br, name, &iop, &ioc);
+  if(ioc == UNALLOCATED_INODE){
+    fprintf(stderr,"path doesn't exist\n");
+    return EXIT_FAILURE;    
+  }
+  if(ioc != UNALLOCATED_INODE && get_inode(ioc).type == IT_DIRECTORY){
+    fprintf(stderr,"path directory\n");
+    return EXIT_FAILURE;    
+  }
+  
+  BLOCK_REFERENCE br2;
+  BLOCK_REFERENCE pbr2;
+  INODE_REFERENCE iop2;
+  INODE_REFERENCE ioc2;
+  char name2[FILE_NAME_SIZE];
+  oufs_find_file(cwd, path_dst, &pbr2, &br2, name2, &iop2, &ioc2);
+  if(br2 != UNALLOCATED_BLOCK){
+    return EXIT_FAILURE;
+  }
+  BLOCK pb2 = get(pbr2);
+  add_inode_to_block(&pb2,ioc,name2);
+  set(pbr2, pb2);
+  INODE inode = get_inode(ioc);
+  inode.n_references++;
+  set_inode(ioc,&inode);
   return EXIT_SUCCESS;
 }
