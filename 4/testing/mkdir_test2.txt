@@ -1,0 +1,30 @@
+#/bin/bash
+#Provided by Drs Andrew Fagg and Christian Grant
+#Modfied by Wyatt S Carpenter
+
+./zformat 
+echo "#######" 
+./zmkdir a00
+./zmkdir a01
+./zmkdir a02
+./zmkdir a03
+./zmkdir a04
+./zmkdir a05
+./zmkdir a06
+./zmkdir a07
+./zmkdir a08
+./zmkdir a09
+./zmkdir a10
+./zmkdir a11
+./zmkdir a12
+./zmkdir a13
+./zmkdir a14
+./zmkdir a15
+./zmkdir a16
+./zmkdir a17
+echo "#######" 
+./zinspect -dblock 9
+echo "#######" 
+./zinspect -master 
+echo "#######" 
+

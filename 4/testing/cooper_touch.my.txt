@@ -1,8 +1,4 @@
-#######
-./
-../
-foo
-#######
+Master tables initialized properly:
 Inode table:
 03
 00
@@ -28,28 +24,10 @@ ff
 00
 00
 00
-#######
-Inode: 0
-Type: D
-Block 0: 9
-Block 1: 65535
-Block 2: 65535
-Block 3: 65535
-Block 4: 65535
-Block 5: 65535
-Block 6: 65535
-Block 7: 65535
-Block 8: 65535
-Block 9: 65535
-Block 10: 65535
-Block 11: 65535
-Block 12: 65535
-Block 13: 65535
-Block 14: 65535
-Size: 3
-#######
+Inode is initialized correctly:
 Inode: 1
 Type: F
+N references: 1
 Block 0: 65535
 Block 1: 65535
 Block 2: 65535
@@ -66,4 +44,12 @@ Block 12: 65535
 Block 13: 65535
 Block 14: 65535
 Size: 0
-#######
+Properly displayed in zfilez:
+./
+../
+b
+Directory is still displayed correctly, and sorting occurs on zfilez:
+./
+../
+a/
+b

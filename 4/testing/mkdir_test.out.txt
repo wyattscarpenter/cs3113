@@ -1,0 +1,69 @@
+#######
+./
+../
+a/
+d/
+e/
+#######
+Directory at block 9:
+Entry 0: name=".", inode=0
+Entry 1: name="..", inode=0
+Entry 2: name="d", inode=1
+Entry 3: name="e", inode=2
+Entry 4: name="a", inode=3
+#######
+./
+../
+a/
+aa/
+b/
+d/
+e/
+#######
+./
+../
+B/
+BA/
+a/
+aa/
+b/
+d/
+e/
+#######
+Directory at block 9:
+Entry 0: name=".", inode=0
+Entry 1: name="..", inode=0
+Entry 2: name="d", inode=1
+Entry 3: name="e", inode=2
+Entry 4: name="a", inode=3
+Entry 5: name="b", inode=4
+Entry 6: name="aa", inode=5
+Entry 7: name="B", inode=6
+Entry 8: name="BA", inode=7
+#######
+Inode table:
+ff
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+ff
+01
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+#######

@@ -1,4 +1,7 @@
 #!/bin/bash
+#Provided by Drs Andrew Fagg and Christian Grant
+#Modfied by Wyatt S Carpenter
+
 ./zformat 
 echo "#######" 
 ./ztouch foo
@@ -6,6 +9,8 @@ echo "#######"
 echo "#######" 
 ./zinspect -master 
 echo "#######" 
+./zinspect -inode 0
+echo "#######"
 ./zinspect -inode 1
 echo "#######" 
 

@@ -1,0 +1,25 @@
+#Provided by Blake Cooper
+#Modfied by Wyatt S Carpenter
+
+
+./zformat
+
+./ztouch b
+
+echo 'Master tables initialized properly:'
+
+./zinspect -master
+
+echo 'Inode is initialized correctly:'
+
+./zinspect -inodee 1
+
+echo 'Properly displayed in zfilez:'
+
+./zfilez
+
+echo 'Directory is still displayed correctly, and sorting occurs on zfilez:'
+
+./zmkdir a
+
+./zfilez

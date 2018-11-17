@@ -1,0 +1,26 @@
+#/bin/bash
+#Provided by Drs Andrew Fagg and Christian Grant
+#Modfied by Wyatt S Carpenter
+
+./zformat 
+echo "#######" 
+./zmkdir d
+./zmkdir e
+./zmkdir a
+./zfilez
+echo "#######" 
+./zinspect -dblock 9
+echo "#######" 
+./zmkdir b
+./zmkdir aa
+./zfilez
+echo "#######" 
+./zmkdir B
+./zmkdir BA
+./zfilez
+echo "#######" 
+./zinspect -dblock 9
+echo "#######" 
+./zinspect -master 
+echo "#######" 
+

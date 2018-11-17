@@ -2,12 +2,23 @@
 #Provided by Drs Andrew Fagg and Christian Grant
 #Modfied by Wyatt S Carpenter
 
+export ZDISK2=vdisk1
+
 ./zformat 
 echo "#######" 
 ./zmkdir foo
 ./zfilez
 echo "#######" 
-./zinspect -master 
+export ZPWD="/foo"
+./zfilez
 echo "#######" 
-./zinspect -inode 1
+./zmkdir bar
+./zfilez
+echo "#######" 
+export ZPWD="/"
+./zfilez
+echo "#######" 
+./zfilez foo
+echo "#######" 
+rm -f $ZDISK2
 echo "#######" 

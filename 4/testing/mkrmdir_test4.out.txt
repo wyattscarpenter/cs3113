@@ -1,0 +1,187 @@
+#######
+./
+../
+bar/
+foo/
+#######
+./
+../
+bar/
+#######
+Inode table:
+0f
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+1f
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+#######
+Directory at block 9:
+Entry 0: name=".", inode=0
+Entry 1: name="..", inode=0
+Entry 3: name="bar", inode=2
+#######
+./
+../
+bar/
+baz/
+#######
+Inode table:
+1f
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+3f
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+#######
+Directory at block 9:
+Entry 0: name=".", inode=0
+Entry 1: name="..", inode=0
+Entry 2: name="baz", inode=4
+Entry 3: name="bar", inode=2
+#######
+Directory at block 10:
+Entry 0: name=".", inode=1
+Entry 1: name="..", inode=2
+Entry 2: name="foobaz", inode=3
+#######
+Directory at block 11:
+Entry 0: name=".", inode=2
+Entry 1: name="..", inode=0
+Entry 2: name="foobar", inode=1
+#######
+Directory at block 12:
+Entry 0: name=".", inode=3
+Entry 1: name="..", inode=1
+#######
+Inode: 0
+Type: D
+Block 0: 9
+Block 1: 65535
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 5
+#######
+Inode: 1
+Type: D
+Block 0: 10
+Block 1: 65535
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 2
+#######
+Inode: 2
+Type: D
+Block 0: 11
+Block 1: 65535
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 3
+#######
+Inode: 3
+Type: D
+Block 0: 12
+Block 1: 65535
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 2
+#######
+Inode: 4
+Type: D
+Block 0: 13
+Block 1: 65535
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 2
+#######

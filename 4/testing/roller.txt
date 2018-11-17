@@ -1,4 +1,6 @@
 #!/bin/sh
+#Provided by Kyle Roller
+#Modfied by Wyatt S Carpenter
 ./zmkdir 1
 ./zmkdir 2
 ./zmkdir 3

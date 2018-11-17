@@ -1,4 +1,6 @@
 #/bin/bash
+#Provided by Drs Andrew Fagg and Christian Grant
+#Modfied by Wyatt S Carpenter
 
 ./zformat 
 echo "#######" 

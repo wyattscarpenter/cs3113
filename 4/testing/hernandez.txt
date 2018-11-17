@@ -1,4 +1,6 @@
 #!/bin/bash
+#Provided by Ryan Hernandez
+#Modfied by Wyatt S Carpenter
 ./zformat
 echo "#######"
 ./zinspect -master

@@ -1,4 +1,4 @@
-Project 3
+Project 4
 
 Name: Wyatt S Carpenter
 
@@ -23,3 +23,4 @@ The project assumes you have permission to write to whatever file your ZDISK env
 References
 For this project, I used as references the man pages and the information and materials presented as part of the class.
 I also used https://arstechnica.com/civis/viewtopic.php?f=20&t=607813 to figure out that I had to write a wrapper function to use qsort correct. Because the function is one line of straightforward C code that there's only really one way to write, my string_compare function ended up looking quite like the function on that website. However, I did not copy and paste, only used the website for guidance.
+To test my code, I used a variety of tests, including the ones provided by the instructors and the ones discussed on canvas. (I modified most of these tests in the course of using them). Therefore I would like to extend thanks to Dr Andrew Fagg, Dr Christian Grant, Lucas Bowker, Kyle Roller, Ryan Hernandez for the tests they provided.

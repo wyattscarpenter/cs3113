@@ -2,6 +2,7 @@
 INCLUDES = oufs.h oufs_lib.h vdisk.h
 LIBS = oufs_lib.o vdisk.o
 EXES = zinspect zformat zfilez zmkdir zrmdir ztouch
+SRCS = zinspect.c zformat.c zfilez.c zmkdir.c zrmdir.c ztouch.c
 FLAGS = -Wall -pedantic -g
 
 all: $(EXES)
