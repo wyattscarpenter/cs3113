@@ -1,0 +1,92 @@
+./
+../
+./
+../
+a.txt
+foo bar baz
+Inode: 1
+Type: F
+Block 0: 10
+Block 1: 65535
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 12
+foo bar baz
+./
+../
+a.txt
+zformat.c
+#include <stdio.h>
+#include "oufs_lib.h"
+
+int main(int argc, char** argv) {
+  // Fetch the key environment vars
+  char cwd[MAX_PATH_LENGTH];
+  char disk_name[MAX_PATH_LENGTH];
+  oufs_get_environment(cwd, disk_name);
+
+  oufs_format_disk(disk_name);
+
+  return(0);
+}
+Inode: 2
+Type: F
+Block 0: 11
+Block 1: 12
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 264
+./
+../
+zformat.c
+Directory at block 9:
+Entry 0: name=".", inode=0
+Entry 1: name="..", inode=0
+Entry 3: name="zformat.c", inode=2
+Inode table:
+05
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+1b
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00

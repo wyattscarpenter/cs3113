@@ -1,0 +1,24 @@
+#Provided by Drs Andrew Fagg and Christian Grant
+#Modfied by Wyatt S Carpenter
+
+./zformat
+./zappend zformat.c < zformat.c
+./zfilez
+./zmkdir project4
+./zmkdir project4/src
+./zfilez project4/src
+./zinspect -master
+./zlink foo project4/src/bar
+./zlink zformat.c project4/src/zformat2.c
+./zfilez project4/src
+./zfilez project4/src/zformat2.c
+./zinspect -master
+./zmore project4/src
+./zmore project4/src/zformat2.c
+./zremove zformat.c
+./zfilez
+./zinspect -master
+./zcat project4/src/zformat2.c
+./zmore project4/src/zformat2.c
+./zremove project4/src/zformat2.c
+./zinspect -master

@@ -1,0 +1,20 @@
+#Provided by Drs Andrew Fagg and Christian Grant
+#Modfied by Wyatt S Carpenter
+
+./zformat
+./zinspect -master
+./zfilez
+./zmkdir foo
+./zfilez
+./zinspect -master
+./zmkdir foo
+./zmkdir
+./zmkdir foo bar
+./zmkdir foo/bar
+./zfilez
+./zfilez foo
+./zrmdir foo
+./zrmdir foo/bar
+./zrmdir foo
+./zfilez
+./zinspect -master

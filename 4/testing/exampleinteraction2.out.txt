@@ -1,0 +1,141 @@
+./
+../
+zformat.c
+./
+../
+Inode table:
+0f
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+3f
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+Source not found
+./
+../
+zformat2.c
+zformat2.c
+Inode table:
+0f
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+3f
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+Not a file.
+#include <stdio.h>
+#include "oufs_lib.h"
+
+int main(int argc, char** argv) {
+  // Fetch the key environment vars
+  char cwd[MAX_PATH_LENGTH];
+  char disk_name[MAX_PATH_LENGTH];
+  oufs_get_environment(cwd, disk_name);
+
+  oufs_format_disk(disk_name);
+
+  return(0);
+}
+./
+../
+project4/
+Inode table:
+0f
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+3f
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+bash: ./zcat: No such file or directory
+#include <stdio.h>
+#include "oufs_lib.h"
+
+int main(int argc, char** argv) {
+  // Fetch the key environment vars
+  char cwd[MAX_PATH_LENGTH];
+  char disk_name[MAX_PATH_LENGTH];
+  oufs_get_environment(cwd, disk_name);
+
+  oufs_format_disk(disk_name);
+
+  return(0);
+}
+Inode table:
+0d
+00
+00
+00
+00
+00
+00
+Block table:
+ff
+33
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00
+00

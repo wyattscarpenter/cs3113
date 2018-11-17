@@ -1,0 +1,19 @@
+#Provided by Drs Andrew Fagg and Christian Grant
+#Modfied by Wyatt S Carpenter
+
+
+./zformat
+./zfilez
+echo foo bar baz | ./zappend a.txt
+./zfilez
+./zmore a.txt
+./zinspect -inode 1
+./zcreate zformat.c < zformat.c
+./zmore a.txt
+./zfilez
+./zmore zformat.c
+./zinspect -inode 2
+./zremove a.txt
+./zfilez
+./zinspect -dblock 9
+./zinspect -master
