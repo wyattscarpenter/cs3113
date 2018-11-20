@@ -645,13 +645,13 @@ int oufs_touch(const char *cwd, const char *path){
   vdisk_write_block(pbr, &lastb);
   return EXIT_SUCCESS;
 }
-int oufs_create(const char *cwd, const char *path){
+int oufs_write(const char *cwd, const char *path){
   return EXIT_FAILURE;
 }
 int oufs_remove(const char *cwd, const char *path){
   return EXIT_FAILURE;
 }
-int oufs_more(const char *cwd, const char *path){
+int oufs_read(const char *cwd, const char *path){
   BLOCK_REFERENCE br;
   BLOCK_REFERENCE pbr;
   INODE_REFERENCE irop;

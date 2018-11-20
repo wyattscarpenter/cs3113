@@ -24,7 +24,9 @@ int main(int argc, char** argv) {
     vdisk_disk_open(disk_name);
     
     // do the thing
-    oufs_create(cwd, path);
+    oufs_remove(cwd, path);
+    //no error checking needed
+    oufs_write(cwd, path);
     
     // Clean up
     vdisk_disk_close();
