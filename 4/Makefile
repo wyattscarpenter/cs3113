@@ -1,8 +1,7 @@
 #This make file was written by Wyatt S Carpenter
 INCLUDES = oufs.h oufs_lib.h vdisk.h
 LIBS = oufs_lib.o vdisk.o
-EXES = zinspect zformat zfilez zmkdir zrmdir ztouch zlink
-SRCS = zinspect.c zformat.c zfilez.c zmkdir.c zrmdir.c ztouch.c
+EXES = zinspect zformat zfilez zmkdir zrmdir ztouch zlink zmore
 FLAGS = -Wall -pedantic -g
 
 all: $(EXES)
@@ -30,6 +29,9 @@ ztouch: ztouch.o $(LIBS)
 
 zlink: zlink.o $(LIBS)
 	cc $(FLAGS) -o zlink zlink.o $(LIBS)
+
+zmore: zmore.o $(LIBS)
+	cc $(FLAGS) -o zmore zmore.o $(LIBS)
 
 #cool rule for object files from dr fagg
 .c.o: $(INCLUDES)

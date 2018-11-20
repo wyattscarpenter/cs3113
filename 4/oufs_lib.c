@@ -452,13 +452,10 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   if(inode_of_child){*inode_of_child = ioc;}
   return EXIT_SUCCESS;
 }
-/*
-int print_dir_by_ir(INODE_REFERENCE ir){
-  INODE i = get_inode(ir);
-  BLOCK d = get(i.data[0]);
-  for(int j = 0; j < i)
-*/
+
 int print_dir(BLOCK_REFERENCE dir){
+  //note that unlike inodes of data blocks, directory blocks can be SPARSE
+  //ie, there may be holes in them, an unalloc followed by an alloc
   if(debug){fprintf(stderr, "##printing dir: %d\n", dir);}
 
   char *names[DIRECTORY_ENTRIES_PER_BLOCK]; //array of char pointers
@@ -478,11 +475,6 @@ int print_dir(BLOCK_REFERENCE dir){
     }
     if(debug){fprintf(stderr, "##time to sort. array size %d\n", j);}
     qsort(&names, j, sizeof(names[0]), &string_compare);
-    //note that strcmp takes char *s not void *s so we had to cast it...
-    //I have the hunch that __compar_fn_t is specific to gcc, so that type is probably not portable.
-    //so we use the ugly (int (*)(const void *, const void *))
-    //actually I only need to cast here because I want to avoid a warning from gcc's -Wall option;
-    //it would work in any case, probably
     if(debug){fprintf(stderr, "##sorted. time to print. array size %d\n", j);}
     for(int i = 0; i < DIRECTORY_ENTRIES_PER_BLOCK; i++){
       if(names[i]){
@@ -660,7 +652,31 @@ int oufs_remove(const char *cwd, const char *path){
   return EXIT_FAILURE;
 }
 int oufs_more(const char *cwd, const char *path){
-  return EXIT_FAILURE;
+  BLOCK_REFERENCE br;
+  BLOCK_REFERENCE pbr;
+  INODE_REFERENCE irop;
+  INODE_REFERENCE iroc;
+  char name[FILE_NAME_SIZE];
+  oufs_find_file(cwd, path, &pbr, &br, name, &irop, &iroc);
+  if(iroc == UNALLOCATED_INODE){
+    fprintf(stderr,"path doesn't exist\n");
+    return EXIT_FAILURE;    
+  }
+  if(iroc != UNALLOCATED_INODE && get_inode(iroc).type == IT_DIRECTORY){
+    fprintf(stderr,"path directory\n");
+    return EXIT_FAILURE;    
+  }
+  //print all the files
+  INODE ioc = get_inode(iroc);
+  int n_blocks = ioc.size / BLOCK_SIZE;
+  int rem = ioc.size % BLOCK_SIZE;
+  for (int i = 0; i < n_blocks; i++){
+  BLOCK b = get(ioc.data[i]);
+    for(int j = 0; j < (i == (n_blocks-1)? BLOCK_SIZE : rem); i++){
+      printf("%c", b.data.data[j]);
+    }
+  }
+  return EXIT_SUCCESS;
 }
 int oufs_link(const char *cwd, const char *path_src, const char *path_dst){
   BLOCK_REFERENCE br;
