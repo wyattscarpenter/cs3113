@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     vdisk_disk_open(disk_name);
 
     // do the thing
-    oufs_more(cwd, path);
+    oufs_read(cwd, path);
 
     // Clean up
     vdisk_disk_close();

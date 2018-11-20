@@ -26,9 +26,9 @@ int oufs_find_open_bit(unsigned char value);
 
 // PROJECT 4 ONLY
 int oufs_touch(const char *cwd, const char *path);
-int oufs_create(const char *cwd, const char *path);
+int oufs_write(const char *cwd, const char *path);
 int oufs_remove(const char *cwd, const char *path);
-int oufs_more(const char *cwd, const char *path);
+int oufs_read(const char *cwd, const char *path);
 int oufs_link(const char *cwd, const char *path_src, const char *path_dst);
 
 //Unlov-ed boys
