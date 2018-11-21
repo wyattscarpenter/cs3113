@@ -5,7 +5,6 @@
 #define dprintf(...) if(debug){fprintf (stderr, __VA_ARGS__);}
 
 BLOCK get(BLOCK_REFERENCE br){
-  //I wrote this function fairly late in the game.
   //we OO now boys
   BLOCK b;
   vdisk_read_block(br, &b);
@@ -45,10 +44,10 @@ int string_compare(const void* l, const void* r){
   return strcmp(*(char**)l,*(char**)r);
 }
 
-int add_block_to_inode(BLOCK_REFERENCE br, INODE inode){
+int add_block_to_inode(BLOCK_REFERENCE br, INODE * inode){
   for(int i = 0; i < BLOCKS_PER_INODE; i++){
-    if(inode.data[i] == UNALLOCATED_BLOCK){
-      inode.data[i] = br;
+    if(inode->data[i] == UNALLOCATED_BLOCK){
+      inode->data[i] = br;
       return EXIT_SUCCESS;
     }
   }
@@ -309,7 +308,7 @@ int ir2ei(INODE_REFERENCE i){
 int oufs_read_inode_by_reference(INODE_REFERENCE i, INODE *inode)
 {
   if(debug){
-    fprintf(stderr, "Fetching inode %d\n", i);
+    fprintf(stderr, "##Fetching inode %d\n", i);
   }
   // Find the address of the inode block and the inode within the block
   BLOCK_REFERENCE block = i / INODES_PER_BLOCK + 1;
@@ -452,7 +451,7 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   char * p = fullpath;
   BLOCK_REFERENCE pbr = br;
   while( (name = strtok(p, "/")) ){
-    if(debug){fprintf(stderr, "##processing this part of path: %s\n", name);}
+    if(debug){fprintf(stderr, "##find_files processing this part of path: %s\n", name);}
     iop = get(pbr).directory.entry[0].inode_reference;
     pbr=br;
     lastname=name;
@@ -463,7 +462,6 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
     }
     p = NULL; //this allows strtok to process the same array next time
   }
-  if(debug){fprintf(stderr, "##assigning values in find_files\n");}
   if(debug){fprintf(stderr, "##assigning parent in find_files\n");}
   *parent = pbr;
   if(debug){fprintf(stderr, "##assigning child in find_files\n");}
@@ -549,7 +547,7 @@ int oufs_mkdir(const char *cwd, const char *path){
     fprintf(stderr,"dir full\n");
     return EXIT_FAILURE;    
   }
-  dprintf("everything valid, so now we have to perform the operations\n");
+  dprintf("##everything valid, so now we have to perform the operations\n");
   //first, allocate the new block
   br = oufs_allocate_new_block();
   if(br == UNALLOCATED_BLOCK){
@@ -598,7 +596,7 @@ int oufs_rmdir(const char *cwd, const char *path){
     fprintf(stderr,"dir nonempty");
     return EXIT_FAILURE;    
   }
-  dprintf("everything valid, so now we have to perform the operations\n");
+  dprintf("##everything valid, so now we have to perform the operations\n");
   BLOCK b;
   BLOCK lastb;
   INODE_REFERENCE ir;
@@ -628,6 +626,7 @@ int oufs_rmdir(const char *cwd, const char *path){
 }
 
 int oufs_touch(const char *cwd, const char *path){
+  dprintf("##touching\n");
   //remember, by default cwd will be "/" and path will be ""
   BLOCK_REFERENCE br;
   BLOCK_REFERENCE pbr;
@@ -648,7 +647,7 @@ int oufs_touch(const char *cwd, const char *path){
     fprintf(stderr,"dir full\n");
     return EXIT_FAILURE;    
   }
-  dprintf("everything valid, so now we have to perform the operations\n");
+  dprintf("##everything valid, so now we have to perform the operations\n");
   //no need to allocate a new block
   INODE_REFERENCE ir = oufs_allocate_new_inode(IT_FILE, UNALLOCATED_BLOCK);
   if(ir == UNALLOCATED_INODE){
@@ -666,6 +665,7 @@ int oufs_touch(const char *cwd, const char *path){
   oufs_write_inode_by_reference(iop, &i);
   //hardcoded location of .. in next line
   vdisk_write_block(pbr, &lastb);
+  dprintf("##done touching\n");
   return EXIT_SUCCESS;
 }
 int oufs_write(const char *cwd, const char *path){
@@ -689,12 +689,32 @@ int oufs_write(const char *cwd, const char *path){
   //do the thing
   //write to files
   //adapted from my own oufs_read
-  int c;
+  int c = 0;
   INODE ioc = get_inode(iroc);
   int n_blocks = ioc.size / BLOCK_SIZE + 1; //some weird boundary cases here
   int rem = ioc.size % BLOCK_SIZE;
+  /*thought about doing it this way:
+  for (int i = size-1; i < BLOCKS_PER_INODE * BLOCK_SIZE; i++){
+    if(c != EOF){
+      break;
+    } else if(ioc.data[i/BLOCK_SIZE] == UNALLOCATED_BLOCK){
+   */
+
   for (int i = n_blocks-1; i < BLOCKS_PER_INODE; i++){
     int begin = (i == n_blocks-1)? rem : 0;
+    if(c == EOF){
+      break;
+    } else if(ioc.data[i] == UNALLOCATED_BLOCK){
+      //allocate new data block for next chuck of data
+      BLOCK_REFERENCE nbr = oufs_allocate_new_block();
+      if(nbr == UNALLOCATED_BLOCK){
+	fprintf(stderr,"all blocks used\n");
+	return EXIT_FAILURE;
+      }
+      if(add_block_to_inode(nbr,&ioc)!=0){
+	return EXIT_FAILURE;
+      }
+    }
     BLOCK b = get(ioc.data[i]);
     for(int j = begin; j < BLOCK_SIZE; j++){
       if( (c = getchar()) != EOF ){
@@ -705,19 +725,6 @@ int oufs_write(const char *cwd, const char *path){
       }
     }
     set(ioc.data[i],b);
-    if(c != EOF){
-      break;
-    } else {
-      //allocate new data block for next chuck of data
-      BLOCK_REFERENCE nbr = oufs_allocate_new_block();
-      if(nbr == UNALLOCATED_BLOCK){
-	fprintf(stderr,"all blocks used\n");
-	return EXIT_FAILURE;
-      }
-      if(add_block_to_inode(nbr,ioc)!=0){
-	return EXIT_FAILURE;
-      }
-    }
   }
   set_inode(iroc, ioc);
   return EXIT_SUCCESS;
@@ -733,6 +740,7 @@ int oufs_remove(const char *cwd, const char *path){
     fprintf(stderr,"path doesn't exist\n");
     return EXIT_FAILURE;    
   }
+  dprintf("%d",iroc);
   if(iroc != UNALLOCATED_INODE && get_inode(iroc).type == IT_DIRECTORY){
     fprintf(stderr,"path directory\n");
     return EXIT_FAILURE;    
@@ -776,7 +784,8 @@ int oufs_read(const char *cwd, const char *path){
   int n_blocks = ioc.size / BLOCK_SIZE + 1; //some weird boundary cases here
   int rem = ioc.size % BLOCK_SIZE;
   for (int i = 0; i < n_blocks; i++){
-    int end = (i == n_blocks-1)? BLOCK_SIZE : rem;
+    int end = (i == n_blocks-1)? rem : BLOCK_SIZE;
+    if(ioc.data[i]==UNALLOCATED_BLOCK){break;}
     BLOCK b = get(ioc.data[i]);
     for(int j = 0; j < end; j++){
       printf("%c", b.data.data[j]);

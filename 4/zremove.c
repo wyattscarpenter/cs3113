@@ -15,16 +15,12 @@ int main(int argc, char** argv) {
   char cwd[MAX_PATH_LENGTH];
   char disk_name[MAX_PATH_LENGTH];
   oufs_get_environment(cwd, disk_name);
-  if(argc==2){
-  // Check arguments
-  char * path = "";
-  // Open the virtual disk
+  if(argc==2){ // Check arguments
+  
   vdisk_disk_open(disk_name);
   
-  // do the thing
-  oufs_remove(cwd, path);
+  oufs_remove(cwd, argv[1]);
   
-  // Clean up
   vdisk_disk_close();
   
   }else{
