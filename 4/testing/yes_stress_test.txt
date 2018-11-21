@@ -1,0 +1,32 @@
+#Provided by Wyatt S Carpenter
+
+echo "######"
+echo names:
+echo max-1
+./ztouch `yes x | head -c 199`
+echo max
+./ztouch `yes y | head -c 200`
+echo max+1
+./ztouch `yes z | head -c 201`
+echo big boy
+./ztouch `yes a | head -c 1000`
+./zfilez
+./zinspect -master
+echo "######"
+echo contents:
+echo max-1
+yes x | head -c 3839 | ./zcreate x
+echo max
+yes y | head -c 3840 | ./zcreate y
+echo max+1
+yes z | head -c 3841 | ./zcreate z
+echo big boy
+yes a | head -c 5000 | ./zcreate a
+./zmore x
+./zmore y
+./zmore z
+./zmore a
+./zfilez
+./zinspect -master
+echo "######"
+
