@@ -2,7 +2,7 @@
 #Modfied by Wyatt S Carpenter
 
 ./zformat
-./zappend zformat.c < zformat.c
+seq 1 10 | ./zappend zformat.c
 ./zfilez
 ./zmkdir project4
 ./zmkdir project4/src

@@ -24,6 +24,7 @@ int set_inode(INODE_REFERENCE ir, INODE i){
 }
 
 int dealloc_block(BLOCK_REFERENCE br){
+  dprintf("##deallocating block %d", br);
   if(br == UNALLOCATED_BLOCK){return -1;}
   BLOCK m = get(MASTER_BLOCK_REFERENCE);
   m.master.block_allocated_flag[br/8] ^= (1 << (br % 8));
@@ -31,6 +32,7 @@ int dealloc_block(BLOCK_REFERENCE br){
 }
 
 int dealloc_inode(INODE_REFERENCE ir){
+  dprintf("##deallocating inode %d", ir);
   if(ir == UNALLOCATED_INODE){return -1;}
   BLOCK m = get(MASTER_BLOCK_REFERENCE);
   m.master.block_allocated_flag[ir/8] ^= (1 << (ir % 8));
@@ -689,42 +691,29 @@ int oufs_write(const char *cwd, const char *path){
   //do the thing
   //write to files
   //adapted from my own oufs_read
-  int c = 0;
+  int c;
   INODE ioc = get_inode(iroc);
-  int n_blocks = ioc.size / BLOCK_SIZE + 1; //some weird boundary cases here
-  int rem = ioc.size % BLOCK_SIZE;
-  /*thought about doing it this way:
-  for (int i = size-1; i < BLOCKS_PER_INODE * BLOCK_SIZE; i++){
-    if(c != EOF){
-      break;
-    } else if(ioc.data[i/BLOCK_SIZE] == UNALLOCATED_BLOCK){
-   */
-
-  for (int i = n_blocks-1; i < BLOCKS_PER_INODE; i++){
-    int begin = (i == n_blocks-1)? rem : 0;
+  BLOCK b = {0}; //this block is just a buffer anyway
+  #define si ioc.size //note that the size s is always equal to the next unwritten character
+  for (si; si < BLOCKS_PER_INODE * BLOCK_SIZE; si++){
+    c = getchar();
     if(c == EOF){
       break;
-    } else if(ioc.data[i] == UNALLOCATED_BLOCK){
-      //allocate new data block for next chuck of data
+    }
+    if(ioc.data[si/BLOCK_SIZE] == UNALLOCATED_BLOCK){
       BLOCK_REFERENCE nbr = oufs_allocate_new_block();
-      if(nbr == UNALLOCATED_BLOCK){
-	fprintf(stderr,"all blocks used\n");
-	return EXIT_FAILURE;
-      }
-      if(add_block_to_inode(nbr,&ioc)!=0){
+      if(nbr==UNALLOCATED_BLOCK)
+      if(add_block_to_inode(oufs_allocate_new_block(),&ioc)!=0){
 	return EXIT_FAILURE;
       }
     }
-    BLOCK b = get(ioc.data[i]);
-    for(int j = begin; j < BLOCK_SIZE; j++){
-      if( (c = getchar()) != EOF ){
-	b.data.data[j] = c;
-	ioc.size++;
-      } else {
-	break;
-      }
+    
+    b.data.data[si%BLOCK_SIZE] = c;
+
+    if(ioc.data[si+1/BLOCK_SIZE] == UNALLOCATED_BLOCK){
+      //write current block, we have reached its end
+      set(ioc.data[si/BLOCK_SIZE], b);
     }
-    set(ioc.data[i],b);
   }
   set_inode(iroc, ioc);
   return EXIT_SUCCESS;
