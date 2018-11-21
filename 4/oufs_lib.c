@@ -616,7 +616,7 @@ int oufs_rmdir(const char *cwd, const char *path){
   dprintf("adjust inode size\n");
   INODE i;
   oufs_read_inode_by_reference(iop, &i);
-  i.size -= 1;
+  i.size--;
   oufs_write_inode_by_reference(iop, &i);
   
   dprintf("deallocate master block bits\n");
