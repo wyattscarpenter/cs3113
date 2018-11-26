@@ -1,1 +1,2 @@
+make
 bash runtest.bash ./thread_incr_psem experiment`date +%Y%m%d%M`.csv

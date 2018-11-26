@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static unsigned int global = 0;
+static unsigned long global = 0;
 static sem_t sem;
 
 static void *                   /* Loop 'arg' times incrementing 'global' */

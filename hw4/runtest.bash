@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 ## Usage: bash runtest.bash ./thread_incr_psem experiment`date +%Y%m%d%M`.csv
 
 if [ $# -ne 2 ]; then
