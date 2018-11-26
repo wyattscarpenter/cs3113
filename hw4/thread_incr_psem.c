@@ -51,6 +51,6 @@ int main(int argc, char *argv[])
     if (s != 0)
       exit(-1);
     }
-    printf("global = %d\n", global);
+    printf("global = %lu\n", global);
     exit(EXIT_SUCCESS);
 }
