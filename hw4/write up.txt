@@ -1,0 +1,23 @@
+A description of how you wrote and compiled your code.
+  I took the provided code, and made a couple modifications to it:
+  First, I edited it to remove all the tpli dependencies. I also made some minor edits to improve the sytle of the code while doing this.
+  Second, I made it take a number of threads as a second argument, and use a for loop to initalize those threads
+  Third, I made the global variable an unsigned long so that the result wouldn't overflow.
+
+A set of all the assumption needed to run the code.
+  The program must be supplied with 2 arguments, and the desired value of global must fit into an unsigned long. You must link pthreads to compile the program. You must request 255 threads or fewer.
+
+Any bugs or corner cases you have handled.
+  The only corner case I handled was the overflow of the global variable, which I made less likely by using an unsigned long
+
+A discussion of what the semaphores are doing.
+  Since we only have 1 resource, the semaphore is essentially putting the threads into a queue to limit them so that only one thread touches the resource at a time.
+  
+A comparison of “real time”, “kernel time”, “user time” and discussion of which one is used in the script.
+  Real time, which we used, is the real actual time the process took, while kernel time and user time are the amount of CPU time spent in kernel and user mode, respectively. Typically one wants to know real time, because real time is what we real impatient humans actually want to optimize in the end.
+
+Descriptions of trends of the plots.
+  The trends are roughly linear. t16 > t8 > t4 > t2 per n loops. In fact, it seems that t16 = 2*t8 = 4*t4 = 8*t2
+
+Explanation of the trend results.
+  Since we only had one resource, and each thread needed exclusive control over that resouce to function, adding more threads just added overhead, so the more threads we had, the slower the overall process. Also, the program each thread was running was O(n), but since there were m threads the overall process was O(m*n)-- ie, the global variable was incremented to m*n, so the overall process was slower with more threads, because it had to increment the number higher before it was finished.
