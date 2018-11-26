@@ -1,0 +1,40 @@
+1, 20000000, 2, 1.11, 1.03, 0.07
+1, 20000000, 2, 1.09, 1.03, 0.05
+1, 20000000, 2, 1.05, 1.01, 0.03
+1, 40000000, 2, 2.28, 2.09, 0.18
+Command terminated by signal 2
+1, 40000000, 2, 0.51, 0.50, 0.01
+1, 40000000, 2, 2.20, 2.10, 0.09
+Command terminated by signal 2
+1, 80000000, 2, 2.11, 2.04, 0.06
+Command terminated by signal 2
+1, 80000000, 2, 0.09, 0.09, 0.00
+Command terminated by signal 2
+1, 80000000, 2, 0.54, 0.50, 0.04
+Command terminated by signal 2
+1, 160000000, 2, 0.14, 0.14, 0.00
+Command terminated by signal 2
+1, 160000000, 2, 0.17, 0.15, 0.01
+Command terminated by signal 2
+1, 160000000, 2, 0.17, 0.15, 0.01
+Command terminated by signal 2
+1, 20000000, 4, 0.15, 0.10, 0.05
+Command terminated by signal 2
+1, 20000000, 4, 0.15, 0.11, 0.04
+Command terminated by signal 2
+1, 20000000, 4, 0.14, 0.11, 0.03
+Command terminated by signal 2
+1, 40000000, 4, 0.15, 0.12, 0.03
+Command terminated by signal 2
+1, 40000000, 4, 0.18, 0.13, 0.05
+Command terminated by signal 2
+1, 40000000, 4, 0.13, 0.09, 0.03
+Command terminated by signal 2
+1, 80000000, 4, 0.15, 0.11, 0.03
+Command terminated by signal 2
+1, 80000000, 4, 0.16, 0.11, 0.04
+Command terminated by signal 2
+1, 80000000, 4, 0.17, 0.10, 0.07
+Command terminated by signal 2
+1, 160000000, 4, 0.19, 0.12, 0.07
+1, 160000000, 4, 65.81, 48.82, 16.95
