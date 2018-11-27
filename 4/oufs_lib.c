@@ -527,8 +527,15 @@ int oufs_list(const char *cwd, const char *path){
   INODE_REFERENCE ioc;
   char name[FILE_NAME_SIZE];
   oufs_find_file(cwd, path, &pbr, &br, name, &iop, &ioc);
-  print_dir(br);
-  return EXIT_SUCCESS;
+  if(ioc != UNALLOCATED_INODE){
+    if(get_inode(ioc).type == IT_DIRECTORY){
+      print_dir(br);
+    } else {
+      puts(name);
+    }
+    return EXIT_SUCCESS;
+  } 
+  return EXIT_FAILURE;
 }
 
 int oufs_mkdir(const char *cwd, const char *path){
