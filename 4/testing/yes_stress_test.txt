@@ -3,25 +3,25 @@
 echo "######"
 echo names:
 echo max-1
-./ztouch `yes x | head -c 199`
+./ztouch `yes x | head -c 199 | tr -d "\n"`
 echo max
-./ztouch `yes y | head -c 200`
+./ztouch `yes x | head -c 200 | tr -d "\n"`
 echo max+1
-./ztouch `yes z | head -c 201`
+./ztouch `yes x | head -c 201 | tr -d "\n"`
 echo big boy
-./ztouch `yes a | head -c 1000`
+./ztouch `yes x | head -c 1000 | tr -d "\n"`
 ./zfilez
 ./zinspect -master
 echo "######"
 echo contents:
 echo max-1
-yes x | head -c 3839 | ./zcreate x
+yes x | head -c 3839 | tr -d "\n" | ./zcreate x
 echo max
-yes y | head -c 3840 | ./zcreate y
+yes y | head -c 3840 | tr -d "\n" | ./zcreate y
 echo max+1
-yes z | head -c 3841 | ./zcreate z
+yes z | head -c 3841 | tr -d "\n" | ./zcreate z
 echo big boy
-yes a | head -c 5000 | ./zcreate a
+yes a | head -c 5000 | tr -d "\n" | ./zcreate a
 ./zmore x
 ./zmore y
 ./zmore z
