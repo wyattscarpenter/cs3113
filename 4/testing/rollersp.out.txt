@@ -25,10 +25,9 @@ ff
 00
 ./
 ../
-1/
 Directory at block 64:
 Entry 0: name=".", inode=55
-Entry 1: name="..", inode=4
+Entry 1: name="..", inode=3
 Inode: 55
 Type: D
 N references: 1
