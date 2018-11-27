@@ -1,0 +1,70 @@
+#!/bin/sh
+#Provided by Kyle Roller
+#Modfied by Wyatt S Carpenter
+./zmkdir 1
+./zmkdir 2
+./zmkdir 3
+./zmkdir 4
+./zmkdir 5
+./zmkdir 6
+./zmkdir 7
+./zmkdir 8
+./zmkdir 9
+./zmkdir 10
+./zmkdir 11
+./zmkdir 12
+./zmkdir 13
+./zmkdir 14
+./zmksir 1/1
+./zmkdir 1/2
+./zmkdir 1/3
+./zmkdir 1/4
+./zmkdir 1/5
+./zmkdir 1/6
+./zmkdir 1/7
+./zmkdir 1/8
+./zmkdir 1/9
+./zmkdir 1/10
+./zmkdir 1/11
+./zmkdir 1/12
+./zmkdir 1/13
+./zmkdir 1/14
+./zmkdir 2/1
+./zmkdir 2/2
+./zmkdir 2/3
+./zmkdir 2/4
+./zmkdir 2/5
+./zmkdir 2/6
+./zmkdir 2/7
+./zmkdir 2/8
+./zmkdir 2/9
+./zmkdir 2/10
+./zmkdir 2/11
+./zmkdir 2/12
+./zmkdir 2/13
+./zmkdir 2/14
+./zmksir 3/1
+./zmkdir 3/2
+./zmkdir 3/3
+./zmkdir 3/4
+./zmkdir 3/5
+./zmkdir 3/6
+./zmkdir 3/7
+./zmkdir 3/8
+./zmkdir 3/9
+./zmkdir 3/10
+./zmkdir 3/11
+./zmkdir 3/12
+./zmkdir 3/13
+./zmkdir 3/14
+./zmkdir 4/1
+./zmkdir 4/2
+./zmkdir 4/3
+./zmkdir 4/4
+
+./zmkdir 4/5
+./zmkdir 4/6
+./zinspect -master
+./zfilez 4
+./zinspect -dblock 64
+./zinspect -inodee 55
