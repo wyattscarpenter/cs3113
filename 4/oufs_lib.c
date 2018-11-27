@@ -35,7 +35,7 @@ int dealloc_inode(INODE_REFERENCE ir){
   dprintf("##deallocating inode %d", ir);
   if(ir == UNALLOCATED_INODE){return -1;}
   BLOCK m = get(MASTER_BLOCK_REFERENCE);
-  m.master.block_allocated_flag[ir/8] ^= (1 << (ir % 8));
+  m.master.inode_allocated_flag[ir/8] ^= (1 << (ir % 8));
   return set(MASTER_BLOCK_REFERENCE, m);
 }
 

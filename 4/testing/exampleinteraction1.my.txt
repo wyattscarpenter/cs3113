@@ -74,7 +74,7 @@ Entry 0: name=".", inode=0
 Entry 1: name="..", inode=0
 Entry 3: name="zformat.c", inode=2
 Inode table:
-07
+05
 00
 00
 00
@@ -82,7 +82,7 @@ Inode table:
 00
 00
 Block table:
-fd
+ff
 1b
 00
 00
