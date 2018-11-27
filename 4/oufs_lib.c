@@ -670,6 +670,27 @@ int oufs_touch(const char *cwd, const char *path){
   dprintf("##done touching\n");
   return EXIT_SUCCESS;
 }
+
+int oufs_write_byte(int index, unsigned char c, INODE * inode){
+  if (!(index < BLOCKS_PER_INODE * BLOCK_SIZE)){
+    return -1;
+  }
+  if(inode->data[index/BLOCK_SIZE]==UNALLOCATED_BLOCK){
+    BLOCK_REFERENCE nbr = oufs_allocate_new_block();
+    if (nbr == UNALLOCATED_BLOCK){
+      return -2;
+    }
+    if (add_block_to_inode(nbr, inode)!=0){
+      return -3;
+    }
+  }
+  BLOCK b = get(inode->data[index/BLOCK_SIZE]);
+  b.data.data[index%BLOCK_SIZE] = c;
+  inode->size++;
+  set(inode->data[index/BLOCK_SIZE], b);
+  return 0;
+}
+
 int oufs_write(const char *cwd, const char *path){
   //must append to the data block
   BLOCK_REFERENCE br;
@@ -688,34 +709,39 @@ int oufs_write(const char *cwd, const char *path){
     fprintf(stderr,"path directory\n");
     return EXIT_FAILURE;    
   }
+  int c;
+  INODE inode = get_inode(iroc);
   //do the thing
   //write to files
   //adapted from my own oufs_read
-  int c;
+  /* int c;
   INODE ioc = get_inode(iroc);
   BLOCK b = {0}; //this block is just a buffer anyway
-  #define si ioc.size //note that the size s is always equal to the next unwritten character
-  for (si; si < BLOCKS_PER_INODE * BLOCK_SIZE; si++){
+  for (int i = ioc.size; i < BLOCKS_PER_INODE * BLOCK_SIZE; i++){
     c = getchar();
     if(c == EOF){
       break;
     }
-    if(ioc.data[si/BLOCK_SIZE] == UNALLOCATED_BLOCK){
+    if(ioc.data[i/BLOCK_SIZE] == UNALLOCATED_BLOCK){
       BLOCK_REFERENCE nbr = oufs_allocate_new_block();
-      if(nbr==UNALLOCATED_BLOCK)
-      if(add_block_to_inode(oufs_allocate_new_block(),&ioc)!=0){
+      if(nbr==UNALLOCATED_BLOCK || add_block_to_inode(nbr,&ioc)!=0){
 	return EXIT_FAILURE;
       }
     }
     
-    b.data.data[si%BLOCK_SIZE] = c;
+    b.data.data[i%BLOCK_SIZE] = c;
 
-    if(ioc.data[si+1/BLOCK_SIZE] == UNALLOCATED_BLOCK){
-      //write current block, we have reached its end
-      set(ioc.data[si/BLOCK_SIZE], b);
+    if(ioc.data[i+1/BLOCK_SIZE] == UNALLOCATED_BLOCK){
+      //write current block to disc, we have reached its end
+      set(ioc.data[i/BLOCK_SIZE], b);
     }
+    } */
+  int i = 0;
+  while(c = getchar(), c != EOF){
+    oufs_write_byte(i, c, &inode);
+    i++;
   }
-  set_inode(iroc, ioc);
+  set_inode(iroc, inode);
   return EXIT_SUCCESS;
 }
 int oufs_remove(const char *cwd, const char *path){
@@ -777,7 +803,7 @@ int oufs_read(const char *cwd, const char *path){
     if(ioc.data[i]==UNALLOCATED_BLOCK){break;}
     BLOCK b = get(ioc.data[i]);
     for(int j = 0; j < end; j++){
-      printf("%c", b.data.data[j]);
+      putchar(b.data.data[j]);
     }
   }
   return EXIT_SUCCESS;
