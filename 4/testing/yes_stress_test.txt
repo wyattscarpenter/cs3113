@@ -12,24 +12,29 @@ echo big boy
 ./ztouch `yes x | head -c 1000 | tr -d "\n"`
 ./zfilez
 ./zinspect -master
+
 echo "######"
 echo contents:
 echo max-1
-yes x | head -c 3839 | tr -d "\n" | ./zcreate x
+yes x | tr -d "\n" | head -c 3839 | ./zcreate x
 ./zmore x
-echo MAX-1 TEST END
+echo wc:
+./zmore x | wc -c
 echo max
-yes y | head -c 3840 | tr -d "\n" | ./zcreate y
+yes y | tr -d "\n" | head -c 3840 | ./zcreate y
 ./zmore y
-echo MAX TEST END
+echo wc:
+./zmore y | wc -c
 echo max+1
-yes z | head -c 3841 | tr -d "\n" | ./zcreate z
+yes z | tr -d "\n" | head -c 3841 | ./zcreate z
 ./zmore z
-echo MAX+1 TEST END
+echo wc:
+./zmore z | wc -c
 echo big boy
-yes a | head -c 5000 | tr -d "\n" | ./zcreate a
+yes a | tr -d "\n" | head -c 10000 | ./zcreate a
 ./zmore a
-echo BIG BOY TEST END
+echo wc:
+./zmore a | wc -c
 
 ./zfilez
 ./zinspect -master
