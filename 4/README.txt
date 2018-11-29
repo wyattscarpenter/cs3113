@@ -15,7 +15,7 @@ My implementation of this project was actually hindered by a conceptual misstep 
 During this project, I began development of "widio.h", a file that implements crucial idiosyncracies I use in C, such as streq, a function that checks if strs are equal (like strcmp, but the right way around)
 While programming, I began to use a development style called "continuous antiquation". In it, I would program something several times, each time making better code & more general hleper functions, as I better understood the problem domain. However, and this is the important part, I never removed the old working code unless I absolutely had to. This is in accordance with the principle of Wu Wei and the ancient Confucian saying, "Man who modify working code, idiot".
 From Project 4:
-My approach was unique in that I did not bother to implement the OUFILE hleper functions. they were a complete waste of time, as far as I can tell.
+My approach was unique in that I did not bother to implement the OUFILE helper functions. they were a complete waste of time, as far as I can tell.
 
 To Run
 Run the appropriate executables located in this folder. If there are no such executables, run make. You may wish to set your environment variables to foreign and exciting values, as specified in the specification, but sensible defaults are provided otherwise.
@@ -23,7 +23,7 @@ Run the appropriate executables located in this folder. If there are no such exe
 Bugs and Assumptions
 This project contains no bugs to the best of my knowledge at this time.
 The project assumes you have permission to write to whatever file your ZDISK environment variable is set to (or vdisk1 in the current directory)
-The project assumes you ar ok with truncation of long file names.
+The project assumes you are ok with truncation of long file names.
 
 References
 For this project, I used as references the man pages and the information and materials presented as part of the class.
