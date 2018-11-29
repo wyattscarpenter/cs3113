@@ -34,6 +34,7 @@ echo "it's a test" | ./zappend a/b/c
 ./zmore 1/2/3
 echo  "let's remove something"
 ./zremove a/b/c
+./zmore a/b/c
 ./zmore 1/2/3
 echo "######"
 ./zinspect -inodee 2
@@ -41,4 +42,14 @@ echo "######"
 echo "######"
 ./zinspect -inodee 5
 ./zinspect -dblock 13
-./zinspect -inodee 3
+echo "######"
+echo "let's remove the other location"
+./zremove 1/2/3
+./zmore a/b/c
+./zmore 1/2/3
+echo "######"
+./zinspect -inodee 2
+./zinspect -dblock 11
+echo "######"
+./zinspect -inodee 5
+./zinspect -dblock 13
