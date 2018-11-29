@@ -1,0 +1,20 @@
+#Provided by Wyatt S Carpenter
+
+#tests printing ascii SOHs (binary files)
+
+#tests a single block
+cat /dev/zero | tr '\0' '\001' | head -c 69 | ./zcreate sohs 
+./zmore sohs
+./zmore sohs | wc -c
+
+#tests 2 blocks
+#when I wrote the following line i dabbed so violently that I killed my cat 
+cat /dev/zero | tr '\0' '\001' | head -c 420 | ./zcreate sohs
+./zmore sohs
+./zmore sohs | wc -c
+
+#tests all blocks
+#this tests a number of sohs over max 
+cat /dev/zero | tr '\0' '\001' | head -c 6969 | ./zcreate sohs
+./zmore sohs
+./zmore sohs | wc -c

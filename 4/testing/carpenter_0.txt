@@ -1,0 +1,20 @@
+#Provided by Wyatt S Carpenter
+
+#tests printing ascii NULs
+
+#tests a single block
+cat /dev/zero | head -c 69 | ./zcreate nuls 
+./zmore nuls
+./zmore nuls | wc -c
+
+#tests 2 blocks
+#when I wrote the following line i dabbed so violently that I killed my cat 
+cat /dev/zero | head -c 420 | ./zcreate nuls
+./zmore nuls
+./zmore nuls | wc -c
+
+#tests all blocks
+#this tests a number of nuls over max 
+cat /dev/zero | head -c 6969 | ./zcreate nuls
+./zmore nuls
+./zmore nuls | wc -c
