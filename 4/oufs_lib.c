@@ -758,6 +758,11 @@ int oufs_remove(const char *cwd, const char *path){
     //dealloc inode
     dealloc_inode(iroc);
   }
+  dprintf("adjust size");
+  INODE i;
+  oufs_read_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
+  i.size--;
+  oufs_write_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
   
   return EXIT_SUCCESS;
 }
@@ -821,5 +826,12 @@ int oufs_link(const char *cwd, const char *path_src, const char *path_dst){
   INODE inode = get_inode(ioc);
   inode.n_references++;
   set_inode(ioc,inode);
+  dprintf("adjust size");
+
+  INODE i;
+  oufs_read_inode_by_reference(get(pbr2).directory.entry[0].inode_reference, &i);
+  i.size++;
+  oufs_write_inode_by_reference(get(pbr2).directory.entry[0].inode_reference, &i);
   return EXIT_SUCCESS;
+
 }
