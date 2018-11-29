@@ -1,4 +1,5 @@
 #Provided by Wyatt S Carpenter
-for i in `seq 1 1000`; do
+cat /dev/zero | head -c 250 | ./zappend f
+for i in `seq 1 10`; do
     echo | ./zappend f && ./zmore f | wc -c
 done
