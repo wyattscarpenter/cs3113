@@ -1,0 +1,44 @@
+#Provided by Wyatt S Carpenter
+
+./zmkdir a
+./zmkdir a/b
+./ztouch a/b/c
+./zmkdir 1
+./zmkdir 1/2
+./zlink a/b/c 1/2/3
+echo "######"
+./zinspect -inodee 0
+./zinspect -dblock 9
+echo "######"
+./zinspect -inodee 1
+./zinspect -dblock 10
+echo "######"
+./zinspect -inodee 2
+./zinspect -dblock 11
+echo "######"
+./zinspect -inodee 3
+echo "######"
+echo "######"
+./zinspect -inodee 4
+./zinspect -dblock 12
+echo "######"
+./zinspect -inodee 5
+./zinspect -dblock 13
+echo "######"
+./zinspect -inodee 3
+echo "######"
+echo "let's try some actual content"
+echo "it's a test" | ./zappend a/b/c
+./zinspect -inodee 3
+./zmore a/b/c
+./zmore 1/2/3
+echo  "let's remove something"
+./zremove a/b/c
+./zmore 1/2/3
+echo "######"
+./zinspect -inodee 2
+./zinspect -dblock 11
+echo "######"
+./zinspect -inodee 5
+./zinspect -dblock 13
+./zinspect -inodee 3
