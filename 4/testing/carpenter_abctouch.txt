@@ -1,5 +1,6 @@
 #Provided by Wyatt S Carpenter
 #just makes some nested directories and inspects their sizes
+#also puts an empty file in there
 ./zmkdir a
 ./zmkdir a/b
 ./ztouch a/b/c
