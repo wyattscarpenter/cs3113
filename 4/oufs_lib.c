@@ -642,12 +642,13 @@ int oufs_touch(const char *cwd, const char *path){
   INODE_REFERENCE iop;
   INODE_REFERENCE ioc;
   char name[FILE_NAME_SIZE];
+  
   oufs_find_file(cwd, path, &pbr, &br, name, &iop, &ioc);
   if(ioc != UNALLOCATED_INODE && get_inode(ioc).type == IT_DIRECTORY){
     fprintf(stderr,"path directory\n");
     return EXIT_FAILURE;    
   }
-  if(br != UNALLOCATED_BLOCK){
+  if(ioc != UNALLOCATED_INODE){
     return EXIT_SUCCESS;
   }
   //check if pbr is full
@@ -718,7 +719,7 @@ int oufs_write(const char *cwd, const char *path){
   int c;
   INODE inode = get_inode(iroc);
   int i = inode.size;
-  while(c = getchar(), c != EOF){
+  while(c = getchar(), c != EOF){ //rare use of comma operator in the wild
     oufs_write_byte(i, c, &inode);
     i++;
   }
