@@ -232,10 +232,13 @@ Directory at block 13:
 Entry 0: name=".", inode=5
 Entry 1: name="..", inode=4
 Entry 2: name="3", inode=3
-Inode: 3
-Type: F
+######
+let's remove the other location
+######
+Inode: 2
+Type: D
 N references: 1
-Block 0: 14
+Block 0: 11
 Block 1: 65535
 Block 2: 65535
 Block 3: 65535
@@ -250,4 +253,30 @@ Block 11: 65535
 Block 12: 65535
 Block 13: 65535
 Block 14: 65535
-Size: 12
+Size: 2
+Directory at block 11:
+Entry 0: name=".", inode=2
+Entry 1: name="..", inode=1
+######
+Inode: 5
+Type: D
+N references: 1
+Block 0: 13
+Block 1: 65535
+Block 2: 65535
+Block 3: 65535
+Block 4: 65535
+Block 5: 65535
+Block 6: 65535
+Block 7: 65535
+Block 8: 65535
+Block 9: 65535
+Block 10: 65535
+Block 11: 65535
+Block 12: 65535
+Block 13: 65535
+Block 14: 65535
+Size: 2
+Directory at block 13:
+Entry 0: name=".", inode=5
+Entry 1: name="..", inode=4
