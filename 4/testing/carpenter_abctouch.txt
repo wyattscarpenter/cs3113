@@ -1,0 +1,18 @@
+#Provided by Wyatt S Carpenter
+#just makes some nested directories and inspects their sizes
+./zmkdir a
+./zmkdir a/b
+./ztouch a/b/c
+echo "######"
+./zinspect -inodee 0
+./zinspect -dblock 9
+echo "######"
+./zinspect -inodee 1
+./zinspect -dblock 10
+echo "######"
+./zinspect -inodee 2
+./zinspect -dblock 11
+echo "######"
+./zinspect -inodee 3
+echo "######"
+
