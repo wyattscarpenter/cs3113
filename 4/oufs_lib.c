@@ -442,7 +442,7 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   BLOCK_REFERENCE br = ROOT_DIRECTORY_BLOCK;
   char fullpath[MAX_PATH_LENGTH*2]; //double-wide path action! consider yourself lucky.
   char * name;
-  char * lastname = ""; //this in "last name" in the sense of "name at end" 
+  char lastname[FILE_NAME_SIZE]; //this in "last name" in the sense of "name at end" 
   if(path && path[0] == '/'){ //path is absolute
     strcpy(fullpath,path);
   } else { //path is relative to cwd
@@ -453,12 +453,11 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   char * p = fullpath;
   BLOCK_REFERENCE pbr = br;
   while( (name = strtok(p, "/")) ){
-    STRNULLCOPY(name,name,FILE_NAME_SIZE);
+    STRNULLCOPY(lastname,name,FILE_NAME_SIZE);
     if(debug){fprintf(stderr, "##find_files processing this part of path: %s\n", name);}
     iop = get(pbr).directory.entry[0].inode_reference;
     pbr=br;
-    lastname=name;
-    br = dirpdir(br, name, &ioc);
+    br = dirpdir(br, lastname, &ioc);
     if(pbr == UNALLOCATED_BLOCK){ //a parent doesn't exist, error
       fprintf(stderr,"a parent directory in the path did not exist\n");
       exit(EXIT_FAILURE);
