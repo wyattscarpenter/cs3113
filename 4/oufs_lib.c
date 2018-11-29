@@ -783,7 +783,7 @@ int oufs_read(const char *cwd, const char *path){
   for (int i = 0; i < n_blocks; i++){
     int end = (i == n_blocks-1)? rem : BLOCK_SIZE;
     if(ioc.data[i]==UNALLOCATED_BLOCK){break;}
-    BLOCK b = get(ioc.data[i]);
+    BLOCK b = get(ioc.data[i]); //I'm pretty sure this reads the size as a block ref when the inode is completely full, but luckily it does nothing with this bad block, because it immediately stops printing after that.
     for(int j = 0; j < end; j++){
       putchar(b.data.data[j]);
     }
