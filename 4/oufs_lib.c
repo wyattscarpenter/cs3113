@@ -129,7 +129,7 @@ int add_inode_to_block(BLOCK *b, INODE_REFERENCE ir, const char * name){
     return -1;
   } else {
     b->directory.entry[i].inode_reference = ir;
-    strcpy(b->directory.entry[i].name, name);
+    STRNULLCOPY(b->directory.entry[i].name, name, FILE_NAME_SIZE);
     return 0;
   }
 }
@@ -453,6 +453,7 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   char * p = fullpath;
   BLOCK_REFERENCE pbr = br;
   while( (name = strtok(p, "/")) ){
+    STRNULLCOPY(name,name,FILE_NAME_SIZE);
     if(debug){fprintf(stderr, "##find_files processing this part of path: %s\n", name);}
     iop = get(pbr).directory.entry[0].inode_reference;
     pbr=br;
@@ -469,7 +470,7 @@ int oufs_find_file(const char *cwd, const char *path, BLOCK_REFERENCE *parent, B
   if(debug){fprintf(stderr, "##assigning child in find_files\n");}
   *child = br;
   if(debug){fprintf(stderr, "##assigning string in find_files\n");}
-  strcpy(local_name, lastname);
+  STRNULLCOPY(local_name, lastname, FILE_NAME_SIZE);
   if(debug){fprintf(stderr, "##assigning iop in find_files\n");}
   *inode_of_parent = iop;
   if(inode_of_child){*inode_of_child = ioc;}
@@ -672,7 +673,6 @@ int oufs_touch(const char *cwd, const char *path){
   oufs_read_inode_by_reference(iop, &i);
   i.size += 1;
   oufs_write_inode_by_reference(iop, &i);
-  //hardcoded location of .. in next line
   vdisk_write_block(pbr, &lastb);
   dprintf("##done touching\n");
   return EXIT_SUCCESS;
@@ -718,32 +718,7 @@ int oufs_write(const char *cwd, const char *path){
   }
   int c;
   INODE inode = get_inode(iroc);
-  //do the thing
-  //write to files
-  //adapted from my own oufs_read
-  /* int c;
-  INODE ioc = get_inode(iroc);
-  BLOCK b = {0}; //this block is just a buffer anyway
-  for (int i = ioc.size; i < BLOCKS_PER_INODE * BLOCK_SIZE; i++){
-    c = getchar();
-    if(c == EOF){
-      break;
-    }
-    if(ioc.data[i/BLOCK_SIZE] == UNALLOCATED_BLOCK){
-      BLOCK_REFERENCE nbr = oufs_allocate_new_block();
-      if(nbr==UNALLOCATED_BLOCK || add_block_to_inode(nbr,&ioc)!=0){
-	return EXIT_FAILURE;
-      }
-    }
-    
-    b.data.data[i%BLOCK_SIZE] = c;
-
-    if(ioc.data[i+1/BLOCK_SIZE] == UNALLOCATED_BLOCK){
-      //write current block to disc, we have reached its end
-      set(ioc.data[i/BLOCK_SIZE], b);
-    }
-    } */
-  int i = 0;
+  int i = inode.size;
   while(c = getchar(), c != EOF){
     oufs_write_byte(i, c, &inode);
     i++;
