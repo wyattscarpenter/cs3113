@@ -578,9 +578,9 @@ int oufs_mkdir(const char *cwd, const char *path){
   add_inode_to_block(&lastb, ir, name);
   //adjust inode size
   INODE i;
-  oufs_read_inode_by_reference(iop, &i);
+  oufs_read_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
   i.size += 1;
-  oufs_write_inode_by_reference(iop, &i);
+  oufs_write_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
   //hardcoded location of .. in next line
   oufs_clean_directory_block(ir,lastb.directory.entry[0].inode_reference,&b);
   vdisk_write_block(pbr, &lastb);

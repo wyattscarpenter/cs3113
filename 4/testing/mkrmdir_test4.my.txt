@@ -107,7 +107,7 @@ Block 11: 65535
 Block 12: 65535
 Block 13: 65535
 Block 14: 65535
-Size: 5
+Size: 4
 #######
 Inode: 1
 Type: D
@@ -126,7 +126,7 @@ Block 11: 65535
 Block 12: 65535
 Block 13: 65535
 Block 14: 65535
-Size: 2
+Size: 3
 #######
 Inode: 2
 Type: D
