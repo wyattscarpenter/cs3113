@@ -622,9 +622,9 @@ int oufs_rmdir(const char *cwd, const char *path){
 
   dprintf("adjust inode size\n");
   INODE i;
-  oufs_read_inode_by_reference(iop, &i);
+  oufs_read_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
   i.size--;
-  oufs_write_inode_by_reference(iop, &i);
+  oufs_write_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
   
   dprintf("deallocate master block bits\n");
   vdisk_read_block(MASTER_BLOCK_REFERENCE, &b);
