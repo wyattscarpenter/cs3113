@@ -670,9 +670,9 @@ int oufs_touch(const char *cwd, const char *path){
   add_inode_to_block(&lastb, ir, name);
   //adjust inode size
   INODE i;
-  oufs_read_inode_by_reference(iop, &i);
+  oufs_read_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
   i.size += 1;
-  oufs_write_inode_by_reference(iop, &i);
+  oufs_write_inode_by_reference(get(pbr).directory.entry[0].inode_reference, &i);
   vdisk_write_block(pbr, &lastb);
   dprintf("##done touching\n");
   return EXIT_SUCCESS;
