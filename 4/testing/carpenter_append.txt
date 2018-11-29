@@ -1,3 +1,5 @@
+#Provided by Wyatt S Carpenter
+
 seq 10000000000000000000 10000000000000000020 | ./zappend numbers
 seq 10000000000000000021 10000000000000000040 | ./zappend numbers
 ./zmore numbers
