@@ -8,6 +8,10 @@ https://drive.google.com/open?id=1FilcLEOxhrr1RxeniRDpEohQOy1KWJtC
 
 To use, simply place this folder into your project 4 folder, cd into this folder, and run ./test-suite. If you'd like to run a single test, run ./run-test [testname.txt]
 
+You may need to issue the command
+chmod +x run-test test-suite
+to set those scripts to be executable
+
 If you'd like to compare your test output to the provided output, I recommend using
 sdiff -b -B [test].out.txt [test].my.txt
 
